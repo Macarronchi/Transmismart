@@ -1,0 +1,2050 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TransmiSmart — Predicción de Congestión Transmilenio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #0b0f1a;
+        --bg2: #111827;
+        --bg3: #1a2235;
+        --border: #1f2d44;
+        --text: #e8edf5;
+        --text2: #8da0bb;
+        --text3: #4a607a;
+        --green: #16a34a;
+        --green-glow: #16a34a33;
+        --amber: #d97706;
+        --amber-glow: #d9770622;
+        --red: #dc2626;
+        --red-glow: #dc262622;
+        --blue: #3b82f6;
+        --blue-glow: #3b82f622;
+        --c76: #3b82f6;
+        --c85: #f59e0b;
+        --hero: #ef4444;
+        --accent: #22d3ee;
+        --accent2: #a78bfa;
+        --radius: 12px;
+        --radius-lg: 20px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* ── Background mesh ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 60% at 20% 10%,
+            #0f3460 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 80% at 80% 90%,
+            #1a0a2e 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 60% 40%,
+            #0a1628 0%,
+            transparent 70%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .app-wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 20px 60px;
+      }
+
+      /* ── Header ── */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 0 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 32px;
+      }
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      h1 span {
+        color: var(--accent);
+      }
+      .header-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #052e16;
+        border: 1px solid var(--green);
+        color: #86efac;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+      }
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(1.4);
+        }
+      }
+      .update-time {
+        color: var(--text3);
+        font-size: 12px;
+      }
+
+      /* ── Layout ── */
+      .grid-main {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 900px) {
+        .grid-main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Cards shared ── */
+      .card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 22px 24px;
+        transition: border-color 0.3s;
+      }
+      .card-title {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card-title svg {
+        flex-shrink: 0;
+      }
+
+      /* ── Station line view ── */
+      .line-view {
+        background: var(--bg3);
+        border-radius: var(--radius);
+        padding: 24px 20px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+      }
+      .line-view::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          var(--border) 10%,
+          var(--border) 90%,
+          transparent 100%
+        );
+        transform: translateY(-50%);
+      }
+      .line-stations {
+        display: flex;
+        justify-content: space-around;
+        position: relative;
+        z-index: 1;
+      }
+      .station-stop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .station-stop:hover {
+        transform: translateY(-2px);
+      }
+      .station-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3px solid var(--border);
+        background: var(--bg2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition:
+          border-color 0.4s,
+          background 0.4s,
+          box-shadow 0.4s;
+      }
+      .station-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text2);
+        text-align: center;
+      }
+      .level-badge {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: var(--bg3);
+        color: var(--text3);
+        border: 1px solid var(--border);
+        transition:
+          background 0.4s,
+          color 0.4s,
+          border-color 0.4s;
+      }
+      .bus-icon {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 20px;
+      }
+
+      /* ── Station cards ── */
+      .stations-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .stations-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .station-card {
+        background: var(--bg3);
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        transition:
+          border-color 0.4s,
+          box-shadow 0.4s;
+        cursor: pointer;
+      }
+      .station-card:hover {
+        transform: translateY(-2px);
+      }
+      .sc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .sc-name {
+        font-family: "Syne", sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .sc-badge {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        transition:
+          background 0.4s,
+          color 0.4s;
+      }
+      .sc-val {
+        font-size: 28px;
+        font-weight: 800;
+        font-family: "Syne", sans-serif;
+        line-height: 1;
+      }
+      .sc-label {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+      .sc-bar-wrap {
+        height: 5px;
+        background: var(--bg);
+        border-radius: 999px;
+        margin-top: 12px;
+        overflow: hidden;
+      }
+      .sc-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        transition:
+          width 0.6s ease,
+          background 0.4s;
+      }
+      .sc-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 11px;
+        color: var(--text3);
+      }
+      .sc-trend {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .sc-proba {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .sc-proba-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+
+      /* ── Right panel ── */
+      .right-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      /* ── Recomendación ── */
+      .rec-card {
+        border-radius: var(--radius);
+        padding: 20px;
+        border: 2px solid var(--border);
+        background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+        transition: border-color 0.4s;
+      }
+      .rec-star {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text3);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .rec-name {
+        font-family: "Syne", sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 8px;
+        transition: color 0.4s;
+      }
+      .rec-motivo {
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 8px;
+      }
+      .rec-val {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 4px;
+      }
+      .rec-badge {
+        display: inline-block;
+        margin-bottom: 4px;
+      }
+
+      /* ── Franja ── */
+      .franja-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--bg3);
+        border-radius: var(--radius);
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+      .franja-icon {
+        font-size: 18px;
+      }
+      .franja-info {
+        flex: 1;
+      }
+      .franja-label {
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+      .franja-value {
+        font-weight: 600;
+      }
+
+      /* ── Chart ── */
+      .chart-section {
+        margin-bottom: 24px;
+      }
+      .chart-controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .chart-btn {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text2);
+        padding: 5px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+      .chart-btn:hover,
+      .chart-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+        font-weight: 600;
+      }
+      .chart-wrap {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        position: relative;
+        height: 280px;
+      }
+      .chart-wrap canvas {
+        max-height: 240px;
+      }
+      .chart-legend-row {
+        display: flex;
+        gap: 16px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      /* ── Servicios ── */
+      .services-section {
+        margin-bottom: 24px;
+      }
+      .station-tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .station-tab {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text2);
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .station-tab:hover {
+        border-color: var(--text2);
+        color: var(--text);
+      }
+      .station-tab.active {
+        color: #fff;
+        font-weight: 700;
+      }
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+      .service-item {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: border-color 0.2s;
+      }
+      .service-item:hover {
+        border-color: var(--text3);
+      }
+      .svc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .svc-ruta {
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+      }
+      .svc-tiempo {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #fff;
+        font-weight: 600;
+        background: var(--bg2);
+        padding: 3px 10px;
+        border-radius: 999px;
+      }
+      .svc-destino {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .svc-freq {
+        font-size: 11px;
+        color: var(--text3);
+      }
+
+      /* ── Reportes ciudadanos ── */
+      .reports-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 800px) {
+        .reports-section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .report-form-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+      }
+      .nivel-btns {
+        display: flex;
+        gap: 10px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+      }
+      .nivel-btn {
+        flex: 1;
+        min-width: 80px;
+        padding: 10px 8px;
+        border-radius: var(--radius);
+        border: 2px solid;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        opacity: 0.55;
+      }
+      .nivel-btn[data-nivel="BAJO"] {
+        border-color: var(--green);
+        color: var(--green);
+        background: var(--green-glow);
+      }
+      .nivel-btn[data-nivel="MEDIO"] {
+        border-color: var(--amber);
+        color: var(--amber);
+        background: var(--amber-glow);
+      }
+      .nivel-btn[data-nivel="ALTO"] {
+        border-color: var(--red);
+        color: var(--red);
+        background: var(--red-glow);
+      }
+      .nivel-btn.selected,
+      .nivel-btn:hover {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+      .nivel-btn[data-nivel="BAJO"].selected {
+        background: var(--green);
+        color: #fff;
+      }
+      .nivel-btn[data-nivel="MEDIO"].selected {
+        background: var(--amber);
+        color: #fff;
+      }
+      .nivel-btn[data-nivel="ALTO"].selected {
+        background: var(--red);
+        color: #fff;
+      }
+
+      textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 13px;
+        padding: 12px;
+        resize: vertical;
+        min-height: 80px;
+        outline: none;
+        transition: border-color 0.2s;
+        margin-bottom: 12px;
+      }
+      textarea:focus {
+        border-color: var(--accent);
+      }
+      textarea::placeholder {
+        color: var(--text3);
+      }
+
+      .station-select {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 13px;
+        padding: 10px 12px;
+        outline: none;
+        transition: border-color 0.2s;
+        margin-bottom: 14px;
+        cursor: pointer;
+      }
+      .station-select:focus {
+        border-color: var(--accent);
+      }
+
+      .btn-primary {
+        width: 100%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #000;
+        border: none;
+        border-radius: var(--radius);
+        padding: 12px;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+      }
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .reporte-result {
+        display: none;
+        padding: 12px 16px;
+        border-radius: var(--radius);
+        margin-top: 12px;
+        font-size: 13px;
+      }
+
+      /* ── Stats de reportes ── */
+      .stats-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+      }
+      .global-stat {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .global-pct {
+        font-family: "Syne", sans-serif;
+        font-size: 52px;
+        font-weight: 800;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .global-sub {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 4px;
+      }
+      .station-stat {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .station-stat:last-child {
+        border-bottom: none;
+      }
+      .sstat-color {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .sstat-name {
+        flex: 1;
+        font-size: 13px;
+      }
+      .sstat-pct {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .sstat-total {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+
+      /* ── Ultimos reportes ── */
+      .ultimos-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .ultimo-item {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+      }
+      .ui-station {
+        font-weight: 600;
+        flex: 1;
+      }
+      .ui-nivel {
+        font-weight: 700;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 999px;
+      }
+      .ui-match {
+        font-size: 11px;
+      }
+      .ui-time {
+        color: var(--text3);
+        font-size: 10px;
+      }
+
+      /* ── Footer ── */
+      footer {
+        border-top: 1px solid var(--border);
+        padding-top: 24px;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .footer-brand {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .footer-brand span {
+        color: var(--accent);
+      }
+      .footer-meta {
+        font-size: 12px;
+        color: var(--text3);
+      }
+
+      /* ── Loading overlay ── */
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+      }
+      .loading-icon {
+        font-size: 48px;
+        animation: spin 1.5s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .loading-text {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .loading-sub {
+        font-size: 13px;
+        color: var(--text3);
+      }
+
+      /* ── Animations ── */
+      .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── Scrollbar ── */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-icon"></div>
+      <div class="loading-text">TransmiSmart</div>
+      <div class="loading-sub">Cargando predicciones en tiempo real…</div>
+    </div>
+
+    <div class="app-wrap">
+      <!-- Header -->
+      <header>
+        <div class="logo-area">
+          <div>
+            <h1>TransmiSmart</h1>
+            <div style="font-size: 11px; color: var(--text3); margin-top: -2px">
+              Predicción de congestión · Transmilenio Bogotá
+            </div>
+          </div>
+        </div>
+        <div class="header-meta">
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            EN VIVO
+          </div>
+          <div class="update-time" data-role="updated">—</div>
+        </div>
+      </header>
+
+      <!-- Estado actual: línea de estaciones -->
+      <div class="card" style="margin-bottom: 24px">
+        <div class="card-title">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Estado Actual ·
+          <span
+            data-role="franja"
+            style="
+              color: var(--text);
+              font-weight: 500;
+              text-transform: none;
+              letter-spacing: 0;
+              font-size: 13px;
+            "
+            >Cargando…</span
+          >
+          &nbsp;<span
+            style="
+              color: var(--text3);
+              font-weight: 400;
+              text-transform: none;
+              letter-spacing: 0;
+              font-size: 12px;
+            "
+            id="ts-display"
+          ></span>
+        </div>
+        <div class="line-view">
+          <div class="line-stations">
+            <div
+              class="station-stop"
+              data-station="calle76"
+              onclick="setActiveStation('calle76')"
+            >
+              <div class="station-dot" id="dot-calle76"></div>
+              <div class="station-name">Calle 76</div>
+              <div class="level-badge" id="badge-calle76">—</div>
+            </div>
+            <div
+              class="station-stop"
+              data-station="calle85"
+              onclick="setActiveStation('calle85')"
+            >
+              <div class="station-dot" id="dot-calle85"></div>
+              <div class="station-name">Calle 85</div>
+              <div class="level-badge" id="badge-calle85">—</div>
+            </div>
+            <div
+              class="station-stop"
+              data-station="heroes"
+              onclick="setActiveStation('heroes')"
+            >
+              <div class="station-dot" id="dot-heroes"></div>
+              <div class="station-name">Los Héroes</div>
+              <div class="level-badge" id="badge-heroes">—</div>
+            </div>
+          </div>
+          <div class="bus-icon" id="bus-icon"></div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="grid-main">
+        <!-- Left: Station cards + Chart -->
+        <div>
+          <!-- Station cards -->
+          <div class="stations-grid" style="margin-bottom: 24px">
+            <!-- Calle 76 -->
+            <div
+              class="station-card"
+              id="card-calle76"
+              data-card="calle76"
+              onclick="setActiveStation('calle76')"
+            >
+              <div class="sc-header">
+                <div class="sc-name" style="color: var(--c76)">Calle 76</div>
+                <div class="sc-badge" id="sc-badge-calle76">—</div>
+              </div>
+              <div class="sc-val" id="sc-val-calle76">—</div>
+              <div class="sc-label">pasajeros / 15 min</div>
+              <div class="sc-bar-wrap">
+                <div class="sc-bar" id="sc-bar-calle76"></div>
+              </div>
+              <div class="sc-footer">
+                <span class="sc-trend" id="sc-trend-calle76">→</span>
+                <div class="sc-proba" id="sc-proba-calle76"></div>
+              </div>
+            </div>
+            <!-- Calle 85 -->
+            <div
+              class="station-card"
+              id="card-calle85"
+              data-card="calle85"
+              onclick="setActiveStation('calle85')"
+            >
+              <div class="sc-header">
+                <div class="sc-name" style="color: var(--c85)">Calle 85</div>
+                <div class="sc-badge" id="sc-badge-calle85">—</div>
+              </div>
+              <div class="sc-val" id="sc-val-calle85">—</div>
+              <div class="sc-label">pasajeros / 15 min</div>
+              <div class="sc-bar-wrap">
+                <div class="sc-bar" id="sc-bar-calle85"></div>
+              </div>
+              <div class="sc-footer">
+                <span class="sc-trend" id="sc-trend-calle85">→</span>
+                <div class="sc-proba" id="sc-proba-calle85"></div>
+              </div>
+            </div>
+            <!-- Los Héroes -->
+            <div
+              class="station-card"
+              id="card-heroes"
+              data-card="heroes"
+              onclick="setActiveStation('heroes')"
+            >
+              <div class="sc-header">
+                <div class="sc-name" style="color: var(--hero)">Los Héroes</div>
+                <div class="sc-badge" id="sc-badge-heroes">—</div>
+              </div>
+              <div class="sc-val" id="sc-val-heroes">—</div>
+              <div class="sc-label">pasajeros / 15 min</div>
+              <div class="sc-bar-wrap">
+                <div class="sc-bar" id="sc-bar-heroes"></div>
+              </div>
+              <div class="sc-footer">
+                <span class="sc-trend" id="sc-trend-heroes">→</span>
+                <div class="sc-proba" id="sc-proba-heroes"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart -->
+          <div class="chart-section">
+            <div class="card-title">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              Proyección de congestión
+            </div>
+            <div class="chart-controls">
+              <span style="font-size: 12px; color: var(--text3)"
+                >Próximas:</span
+              >
+            </div>
+            <div class="chart-wrap">
+              <canvas id="congestion-chart"></canvas>
+            </div>
+            <div class="chart-legend-row">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: var(--c76)"></div>
+                Calle 76
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: var(--c85)"></div>
+                Calle 85
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: var(--hero)"></div>
+                Los Héroes
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel -->
+        <div class="right-panel">
+          <!-- Recomendación -->
+          <div class="rec-card" id="recomendacion">
+            <div class="rec-star">Estación recomendada</div>
+            <div class="rec-name" id="rec-name">Cargando…</div>
+            <div class="rec-badge">
+              <span class="level-badge" id="rec-level">—</span>
+            </div>
+            <div class="rec-motivo" id="rec-motivo"></div>
+            <div class="rec-val" id="rec-val"></div>
+          </div>
+
+          <!-- Franja horaria -->
+          <div class="franja-row">
+            <div class="franja-icon"></div>
+            <div class="franja-info">
+              <div class="franja-label">Franja horaria</div>
+              <div class="franja-value" data-role="franja-detail">—</div>
+            </div>
+            <div
+              style="font-size: 11px; color: var(--text3); text-align: right"
+            >
+              <div>Día</div>
+              <div
+                style="color: var(--text2); font-weight: 500"
+                id="dia-semana"
+              >
+                —
+              </div>
+            </div>
+          </div>
+
+          <!-- Servicios -->
+          <div>
+            <div class="card-title" style="margin-bottom: 12px">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="1" y="3" width="15" height="13" />
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+              </svg>
+              Servicios ·
+              <span
+                id="servicios-titulo"
+                style="
+                  color: var(--text);
+                  font-weight: 500;
+                  text-transform: none;
+                  letter-spacing: 0;
+                  font-size: 12px;
+                "
+                >Los Héroes</span
+              >
+            </div>
+            <div id="servicios-list">
+              <div
+                style="color: var(--text3); font-size: 13px; padding: 10px 0"
+              >
+                Cargando servicios…
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Servicios completos (sección propia) -->
+      <div class="services-section">
+        <div class="card-title">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          Explorar estación
+        </div>
+        <div class="station-tabs">
+          <button class="station-tab active" data-station-tab="heroes">
+            Los Héroes
+          </button>
+          <button class="station-tab" data-station-tab="calle76">
+            Calle 76
+          </button>
+          <button class="station-tab" data-station-tab="calle85">
+            Calle 85
+          </button>
+        </div>
+        <div class="services-grid" id="services-grid-full">
+          <div style="color: var(--text3); font-size: 13px">Cargando…</div>
+        </div>
+      </div>
+
+      <!-- Reportes ciudadanos -->
+      <div class="reports-section">
+        <!-- Formulario -->
+        <div class="report-form-card">
+          <div class="card-title" style="margin-bottom: 16px">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+              />
+            </svg>
+            Tu opinión importa
+          </div>
+          <div
+            style="font-size: 13px; color: var(--text2); margin-bottom: 14px"
+          >
+            ¿Cómo está la congestión ahora mismo? Tu reporte ayuda a mejorar el
+            modelo de predicción.
+          </div>
+
+          <label
+            style="
+              font-size: 12px;
+              color: var(--text3);
+              display: block;
+              margin-bottom: 6px;
+            "
+            >ESTACIÓN QUE REPORTAS</label
+          >
+          <select class="station-select" id="report-station">
+            <option value="heroes">Los Héroes</option>
+            <option value="calle76">Calle 76</option>
+            <option value="calle85">Calle 85</option>
+          </select>
+
+          <label
+            style="
+              font-size: 12px;
+              color: var(--text3);
+              display: block;
+              margin-bottom: 8px;
+            "
+            >NIVEL DE CONGESTIÓN</label
+          >
+          <div class="nivel-btns">
+            <button class="nivel-btn" data-nivel="BAJO">BAJO</button>
+            <button class="nivel-btn" data-nivel="MEDIO">MEDIO</button>
+            <button class="nivel-btn" data-nivel="ALTO">ALTO</button>
+          </div>
+
+          <label
+            style="
+              font-size: 12px;
+              color: var(--text3);
+              display: block;
+              margin-bottom: 6px;
+            "
+            >COMENTARIO (opcional)</label
+          >
+          <textarea
+            id="comentario"
+            placeholder="¿Algo más que quieras contarnos? Ej: el bus pasó lleno, mucha gente esperando…"
+          ></textarea>
+
+          <button class="btn-primary" id="btn-enviar-reporte">
+            Enviar reporte
+          </button>
+          <div class="reporte-result" id="reporte-result"></div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-card">
+          <div class="card-title" style="margin-bottom: 16px">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            IA vs Ciudadanos
+          </div>
+          <div class="global-stat">
+            <div class="global-pct" id="global-pct">—</div>
+            <div class="global-sub">congestión combinada IA + ciudadanos</div>
+            <div
+              style="font-size: 11px; color: var(--text3); margin-top: 6px"
+              id="total-reportes"
+            >
+              Sin reportes aún
+            </div>
+          </div>
+          <div id="by-station-stats">
+            <div class="station-stat">
+              <div class="sstat-color" style="background: var(--c76)"></div>
+              <div class="sstat-name">
+                Calle 76
+                <div class="sstat-total" id="sstat-total-calle76">
+                  0 reportes
+                </div>
+              </div>
+              <div class="sstat-pct" id="sstat-pct-calle76">—</div>
+            </div>
+            <div class="station-stat">
+              <div class="sstat-color" style="background: var(--c85)"></div>
+              <div class="sstat-name">
+                Calle 85
+                <div class="sstat-total" id="sstat-total-calle85">
+                  0 reportes
+                </div>
+              </div>
+              <div class="sstat-pct" id="sstat-pct-calle85">—</div>
+            </div>
+            <div class="station-stat">
+              <div class="sstat-color" style="background: var(--hero)"></div>
+              <div class="sstat-name">
+                Los Héroes
+                <div class="sstat-total" id="sstat-total-heroes">
+                  0 reportes
+                </div>
+              </div>
+              <div class="sstat-pct" id="sstat-pct-heroes">—</div>
+            </div>
+          </div>
+          <!-- Últimos reportes -->
+          <div style="margin-top: 16px">
+            <div
+              style="
+                font-size: 11px;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+                margin-bottom: 10px;
+              "
+            >
+              Últimos reportes
+            </div>
+            <div class="ultimos-list" id="ultimos-list">
+              <div
+                style="
+                  color: var(--text3);
+                  font-size: 12px;
+                  text-align: center;
+                  padding: 10px;
+                "
+              >
+                Sin reportes aún
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        <div class="footer-brand">TransmiSmart</div>
+        <div class="footer-meta" id="footer-ts">—</div>
+      </footer>
+    </div>
+
+    <script>
+      // ─── Config ───────────────────────────────────────────────────────────────────
+      const API_BASE = ""; // Misma origen cuando Flask sirve el HTML
+
+      const CONG_COLORS = {
+        BAJO: {
+          bg: "#16a34a",
+          text: "#dcfce7",
+          border: "#15803d",
+          dot: "#22c55e",
+          glow: "#16a34a33",
+        },
+        MEDIO: {
+          bg: "#d97706",
+          text: "#fef3c7",
+          border: "#b45309",
+          dot: "#f59e0b",
+          glow: "#d9770633",
+        },
+        ALTO: {
+          bg: "#dc2626",
+          text: "#fee2e2",
+          border: "#b91c1c",
+          dot: "#ef4444",
+          glow: "#dc262633",
+        },
+      };
+      const STATION_COLORS = {
+        calle76: "#3b82f6",
+        calle85: "#f59e0b",
+        heroes: "#ef4444",
+      };
+      const STATION_NAMES = {
+        calle76: "Calle 76",
+        calle85: "Calle 85",
+        heroes: "Los Héroes",
+      };
+      const STATION_KEYS = ["calle76", "calle85", "heroes"];
+
+      let lastPrediction = null;
+      let lastLags = { calle76: null, calle85: null, heroes: null };
+      let chartInstance = null;
+      let activeStation = "heroes";
+      let secondsSince = 0;
+
+      // ─── Helpers ──────────────────────────────────────────────────────────────────
+      const $ = (s, c = document) => c.querySelector(s);
+      const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+
+      function applyBadge(el, nivel) {
+        if (!el) return;
+        const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
+        el.textContent = nivel;
+        el.style.cssText = `background:${c.bg};color:#fff;border:1.5px solid ${c.border};
+    padding:2px 10px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:.5px;`;
+      }
+
+      function setActiveStation(key) {
+        activeStation = key;
+        // Update tabs
+        $$(".station-tab").forEach((t) => {
+          t.classList.toggle("active", t.dataset.stationTab === key);
+          t.style.background =
+            t.dataset.stationTab === key ? STATION_COLORS[key] : "";
+          t.style.color = t.dataset.stationTab === key ? "#fff" : "";
+          t.style.borderColor =
+            t.dataset.stationTab === key ? STATION_COLORS[key] : "";
+        });
+        $("#report-station").value = key;
+        loadServicios(key);
+        loadServiciosFull(key);
+        // Update servicios title in right panel
+        $("#servicios-titulo").textContent = STATION_NAMES[key];
+      }
+
+      // ─── Predicción → UI ──────────────────────────────────────────────────────────
+      function updateUI(data) {
+        lastPrediction = data;
+
+        // Timestamp
+        const ts = data.timestamp?.slice(11, 16) || "";
+        const tsEl = $("#ts-display");
+        if (tsEl) tsEl.textContent = ts;
+
+        // Franja
+        $$("[data-role='franja'], [data-role='franja-detail']").forEach(
+          (el) => {
+            el.textContent = data.franja || "";
+          },
+        );
+        const diaEl = $("#dia-semana");
+        if (diaEl) diaEl.textContent = data.dia_semana || "";
+
+        // Footer timestamp
+        const ftEl = $("#footer-ts");
+        if (ftEl) ftEl.textContent = `Última actualización: ${data.timestamp}`;
+
+        // Por estación
+        STATION_KEYS.forEach((key) => {
+          const p = data.predicciones[key];
+          const niv = data.congestion_map[key];
+          const c = CONG_COLORS[niv] || CONG_COLORS.BAJO;
+
+          // Line view
+          const dot = $(`#dot-${key}`);
+          if (dot) {
+            dot.style.borderColor = c.dot;
+            dot.style.boxShadow = `0 0 12px ${c.glow}`;
+            dot.style.background = c.glow;
+          }
+          applyBadge($(`#badge-${key}`), niv);
+
+          // Card
+          const card = $(`#card-${key}`);
+          if (card) {
+            card.style.borderColor = c.border;
+            card.style.boxShadow = `0 0 20px ${c.glow}`;
+          }
+          applyBadge($(`#sc-badge-${key}`), niv);
+
+          const valEl = $(`#sc-val-${key}`);
+          if (valEl) {
+            valEl.textContent = p.validaciones;
+            valEl.style.color = c.dot;
+          }
+
+          const bar = $(`#sc-bar-${key}`);
+          if (bar) {
+            const pct = Math.min(
+              Math.round((p.validaciones / (p.umbral_alto * 1.5 || 120)) * 100),
+              100,
+            );
+            bar.style.width = `${pct}%`;
+            bar.style.background = c.dot;
+          }
+
+          const trend = $(`#sc-trend-${key}`);
+          if (trend) {
+            const prob_alto = p.probabilidades?.ALTO || 0;
+            trend.textContent =
+              prob_alto > 0.5 ? "↑" : prob_alto < 0.2 ? "↓" : "→";
+            trend.style.color = c.dot;
+          }
+
+          // Probabilidades mini dots
+          const probaEl = $(`#sc-proba-${key}`);
+          if (probaEl && p.probabilidades) {
+            probaEl.innerHTML = ["BAJO", "MEDIO", "ALTO"]
+              .map((n) => {
+                const col = CONG_COLORS[n].dot;
+                const pct = Math.round((p.probabilidades[n] || 0) * 100);
+                return `<div class="sc-proba-dot" title="${n}: ${pct}%" style="background:${col};opacity:${0.3 + (pct / 100) * 0.7}"></div>`;
+              })
+              .join("");
+          }
+
+          // Update lag
+          lastLags[key] = p.validaciones;
+        });
+
+        // Bus icon — color de la estación activa
+        const busEl = $("#bus-icon");
+        if (busEl) {
+          const niv = data.congestion_map[activeStation] || "BAJO";
+          busEl.style.filter = `drop-shadow(0 0 8px ${CONG_COLORS[niv].dot})`;
+        }
+
+        // Recomendación
+        const rec = data.recomendacion;
+        if (rec) {
+          const c = CONG_COLORS[rec.congestion] || CONG_COLORS.BAJO;
+          const recCard = $("#recomendacion");
+          if (recCard) {
+            recCard.style.borderColor = c.border;
+            recCard.style.boxShadow = `0 0 24px ${c.glow}`;
+          }
+          const nameEl = $("#rec-name");
+          if (nameEl) {
+            nameEl.textContent = rec.station_name;
+            nameEl.style.color = c.dot;
+          }
+          applyBadge($("#rec-level"), rec.congestion);
+          const motEl = $("#rec-motivo");
+          if (motEl) motEl.textContent = rec.motivo;
+          const valEl = $("#rec-val");
+          if (valEl)
+            valEl.textContent = `~${rec.validaciones} pasajeros esperados`;
+        }
+
+        secondsSince = 0;
+      }
+
+      // ─── Fetch predicción ─────────────────────────────────────────────────────────
+      async function fetchAndUpdate() {
+        try {
+          const resp = await fetch(`${API_BASE}/predict/now`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              lag_calle76: lastLags.calle76,
+              lag_calle85: lastLags.calle85,
+              lag_heroes: lastLags.heroes,
+            }),
+          });
+          const data = await resp.json();
+          updateUI(data);
+          const updEl = $("[data-role='updated']");
+          if (updEl) updEl.textContent = "Actualizado hace 0 s";
+        } catch (e) {
+          console.error("Error predicción:", e);
+        }
+      }
+
+      // ─── Chart ────────────────────────────────────────────────────────────────────
+      async function loadChart(horas = 2) {
+        try {
+          const resp = await fetch(`${API_BASE}/predict/range`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ horas }),
+          });
+          const data = await resp.json();
+          renderChart(data.intervalos || [], horas);
+        } catch (e) {
+          console.error("Error chart:", e);
+        }
+      }
+
+      function renderChart(intervalos, horas) {
+        const canvas = $("#congestion-chart");
+        if (!canvas) return;
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+        }
+
+        const labels = intervalos.map(
+          (iv) => iv.timestamp?.slice(11, 16) || "",
+        );
+
+        const umbralM = lastPrediction
+          ? Object.values(lastPrediction.predicciones).reduce(
+              (s, p) => s + p.umbral_bajo,
+              0,
+            ) / 3
+          : 40;
+        const umbralA = lastPrediction
+          ? Object.values(lastPrediction.predicciones).reduce(
+              (s, p) => s + p.umbral_alto,
+              0,
+            ) / 3
+          : 80;
+
+        // Color de puntos según congestión
+        const pts76 = intervalos.map((iv) => ({
+          x: iv.timestamp?.slice(11, 16),
+          y: iv.calle76,
+          cong: iv.cong_calle76,
+        }));
+        const pts85 = intervalos.map((iv) => ({
+          x: iv.timestamp?.slice(11, 16),
+          y: iv.calle85,
+          cong: iv.cong_calle85,
+        }));
+        const ptsHero = intervalos.map((iv) => ({
+          x: iv.timestamp?.slice(11, 16),
+          y: iv.heroes,
+          cong: iv.cong_heroes,
+        }));
+
+        chartInstance = new Chart(canvas.getContext("2d"), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Calle 76",
+                data: intervalos.map((iv) => iv.calle76),
+                borderColor: "#3b82f6",
+                backgroundColor: "#3b82f611",
+                pointBackgroundColor: intervalos.map(
+                  (iv) => CONG_COLORS[iv.cong_calle76]?.dot || "#22c55e",
+                ),
+                pointRadius: 4,
+                tension: 0.3,
+                fill: true,
+                borderWidth: 2,
+              },
+              {
+                label: "Calle 85",
+                data: intervalos.map((iv) => iv.calle85),
+                borderColor: "#f59e0b",
+                backgroundColor: "#f59e0b11",
+                pointBackgroundColor: intervalos.map(
+                  (iv) => CONG_COLORS[iv.cong_calle85]?.dot || "#22c55e",
+                ),
+                pointRadius: 4,
+                tension: 0.3,
+                fill: true,
+                borderWidth: 2,
+              },
+              {
+                label: "Los Héroes",
+                data: intervalos.map((iv) => iv.heroes),
+                borderColor: "#ef4444",
+                backgroundColor: "#ef444411",
+                pointBackgroundColor: intervalos.map(
+                  (iv) => CONG_COLORS[iv.cong_heroes]?.dot || "#22c55e",
+                ),
+                pointRadius: 4,
+                tension: 0.3,
+                fill: true,
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 600 },
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: "#1a2235",
+                borderColor: "#1f2d44",
+                borderWidth: 1,
+                titleColor: "#e8edf5",
+                bodyColor: "#8da0bb",
+                callbacks: {
+                  label(ctx) {
+                    const iv = intervalos[ctx.dataIndex];
+                    const keys = ["calle76", "calle85", "heroes"];
+                    const key = keys[ctx.datasetIndex];
+                    const cg = iv[`cong_${key}`];
+                    const em = { BAJO: "", MEDIO: "", ALTO: "" }[cg] || "";
+                    return ` ${ctx.dataset.label}: ${ctx.parsed.y} pax ${em}`;
+                  },
+                },
+              },
+              annotation: {
+                annotations: {
+                  lineM: {
+                    type: "line",
+                    yMin: umbralM,
+                    yMax: umbralM,
+                    borderColor: "#f59e0b",
+                    borderWidth: 1.5,
+                    borderDash: [5, 4],
+                    label: {
+                      display: true,
+                      content: "MEDIO",
+                      color: "#f59e0b",
+                      position: "end",
+                      backgroundColor: "transparent",
+                      font: { size: 10 },
+                    },
+                  },
+                  lineA: {
+                    type: "line",
+                    yMin: umbralA,
+                    yMax: umbralA,
+                    borderColor: "#ef4444",
+                    borderWidth: 1.5,
+                    borderDash: [5, 4],
+                    label: {
+                      display: true,
+                      content: "ALTO",
+                      color: "#ef4444",
+                      position: "end",
+                      backgroundColor: "transparent",
+                      font: { size: 10 },
+                    },
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: "#1f2d44" },
+                ticks: { color: "#4a607a", maxRotation: 0, maxTicksLimit: 8 },
+              },
+              y: {
+                grid: { color: "#1f2d44" },
+                ticks: { color: "#4a607a" },
+                title: {
+                  display: true,
+                  text: "Pasajeros / 15 min",
+                  color: "#4a607a",
+                  font: { size: 11 },
+                },
+                min: 0,
+              },
+            },
+          },
+        });
+      }
+
+      // ─── Servicios (panel derecho) ─────────────────────────────────────────────────
+      async function loadServicios(key) {
+        const container = $("#servicios-list");
+        if (!container) return;
+        try {
+          const resp = await fetch(`${API_BASE}/servicios/${key}`);
+          const data = await resp.json();
+          if (!data.rutas || !data.rutas.length) {
+            container.innerHTML = `<p style="color:var(--text3);font-size:12px;">Sin servicios disponibles</p>`;
+            return;
+          }
+          container.innerHTML = data.rutas
+            .slice(0, 4)
+            .map(
+              (r) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;
+        padding:8px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:${STATION_COLORS[key]};">${r.ruta}</div>
+          <div style="font-size:11px;color:var(--text2);">${r.destino}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;background:var(--bg3);
+          padding:4px 10px;border-radius:999px;font-size:12px;color:#fff;font-weight:600;">
+          ⏱ ${r.tiempo_min} min
+        </div>
+      </div>
+    `,
+            )
+            .join("");
+        } catch (e) {
+          container.innerHTML = `<p style="color:var(--text3);font-size:12px;">Error cargando servicios</p>`;
+        }
+      }
+
+      // ─── Servicios completos ──────────────────────────────────────────────────────
+      async function loadServiciosFull(key) {
+        const grid = $("#services-grid-full");
+        if (!grid) return;
+        try {
+          const resp = await fetch(`${API_BASE}/servicios/${key}`);
+          const data = await resp.json();
+          if (!data.rutas?.length) {
+            grid.innerHTML = `<p style="color:var(--text3);font-size:13px;">Sin servicios disponibles</p>`;
+            return;
+          }
+          grid.innerHTML = data.rutas
+            .map(
+              (r) => `
+      <div class="service-item">
+        <div class="svc-header">
+          <div class="svc-ruta" style="color:${STATION_COLORS[key]};">${r.ruta}</div>
+          <div class="svc-tiempo">⏱ ${r.tiempo_min} min</div>
+        </div>
+        <div class="svc-destino">→ ${r.destino}</div>
+      </div>
+    `,
+            )
+            .join("");
+        } catch (e) {
+          grid.innerHTML = `<p style="color:var(--text3);font-size:12px;">Error cargando</p>`;
+        }
+      }
+
+      // ─── Reportes ciudadanos ──────────────────────────────────────────────────────
+      async function enviarReporte() {
+        const nivelBtn = $(".nivel-btn.selected");
+        const nivel = nivelBtn?.dataset.nivel;
+        const coment = $("#comentario")?.value || "";
+        const station = $("#report-station")?.value || "heroes";
+
+        if (!nivel) {
+          alert(
+            "Por favor selecciona un nivel de congestión (BAJO, MEDIO o ALTO).",
+          );
+          return;
+        }
+
+        const btn = $("#btn-enviar-reporte");
+        btn.disabled = true;
+        btn.textContent = "Enviando…";
+
+        try {
+          const resp = await fetch(`${API_BASE}/report`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              station_key: station,
+              nivel_usuario: nivel,
+              comentario: coment,
+            }),
+          });
+          const data = await resp.json();
+          showReporteResult(data);
+          if (data.ok) {
+            if ($("#comentario")) $("#comentario").value = "";
+            $$(".nivel-btn").forEach((b) => b.classList.remove("selected"));
+            loadReporteStats();
+          }
+        } catch (e) {
+          showReporteResult({ ok: false, mensaje: `Error: ${e.message}` });
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Enviar reporte";
+        }
+      }
+
+      function showReporteResult(data) {
+        const el = $("#reporte-result");
+        if (!el) return;
+        const ok = data.ok !== false;
+        el.style.cssText = `display:block;padding:12px 16px;border-radius:10px;margin-top:12px;
+    background:${ok ? "#052e16" : "#450a0a"};border:1px solid ${ok ? "#16a34a" : "#dc2626"};
+    color:${ok ? "#86efac" : "#fca5a5"};font-size:13px;`;
+        el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:${data.nivel_modelo ? "6px" : "0"}">
+      <span>${ok ? "" : ""}</span>
+      <span>${data.mensaje || (ok ? "Reporte enviado" : "Error al enviar")}</span>
+    </div>
+    ${
+      ok && data.nivel_modelo
+        ? `
+      <div style="font-size:11px;opacity:.85;">
+        Modelo predijo: <strong>${data.nivel_modelo}</strong> · Tu reporte: <strong>${data.nivel_usuario}</strong> ·
+        ${data.coincide ? " ¡Coincide!" : " Diferente — ayuda a mejorar el modelo"}
+      </div>
+    `
+        : ""
+    }
+  `;
+        setTimeout(() => {
+          el.style.display = "none";
+        }, 7000);
+      }
+
+      // ─── Stats reportes ───────────────────────────────────────────────────────────
+      async function loadReporteStats() {
+        try {
+          const resp = await fetch(`${API_BASE}/report/stats`);
+          const data = await resp.json();
+
+         const gpct = $("#global-pct");
+        if (gpct)
+          gpct.textContent = data.congestion_mixta_global !== undefined
+            ? `${data.congestion_mixta_global}%`
+            : "—";
+          const trep = $("#total-reportes");
+          if (trep)
+            trep.textContent = `${data.total} reporte${data.total !== 1 ? "s" : ""} ciudadanos`;
+
+          STATION_KEYS.forEach((key) => {
+            const s = data.by_station?.[key];
+            if (!s) return;
+            const pEl = $(`#sstat-pct-${key}`);
+            if (pEl) {
+              pEl.textContent = s.congestion_mixta !== undefined
+                ? `${s.congestion_mixta}%`
+                : "—";
+            }
+            const tEl = $(`#sstat-total-${key}`);
+            if (tEl)
+              tEl.textContent = `${s.total} reporte${s.total !== 1 ? "s" : ""}`;
+          });
+
+          // Últimos reportes
+          const ul = $("#ultimos-list");
+          if (ul && data.ultimos?.length) {
+            ul.innerHTML = data.ultimos
+              .map((r) => {
+                const c = CONG_COLORS[r.nivel_usuario] || CONG_COLORS.BAJO;
+                const ts = r.timestamp
+                  ? new Date(r.timestamp).toLocaleTimeString("es-CO", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "";
+                return `
+          <div class="ultimo-item">
+            <span class="ui-station">${r.station}</span>
+            <span class="ui-nivel" style="background:${c.bg};color:#fff;border-radius:999px;padding:2px 8px;">${r.nivel_usuario}</span>
+            <span class="ui-match">${r.coincide ? "" : ""}</span>
+            <span class="ui-time">${ts}</span>
+          </div>
+        `;
+              })
+              .join("");
+          } else if (ul) {
+            ul.innerHTML = `<div style="color:var(--text3);font-size:12px;text-align:center;padding:10px;">Sin reportes aún</div>`;
+          }
+        } catch (e) {
+          console.warn("Error stats:", e);
+        }
+      }
+
+      // ─── Event listeners ──────────────────────────────────────────────────────────
+      function attachEvents() {
+        // Nivel buttons
+        $$(".nivel-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            $$(".nivel-btn").forEach((b) => b.classList.remove("selected"));
+            btn.classList.add("selected");
+          });
+        });
+
+        // Enviar reporte
+        $("#btn-enviar-reporte")?.addEventListener("click", enviarReporte);
+
+        // Chart hours
+        $$(".chart-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            $$(".chart-btn").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            loadChart(parseInt(btn.dataset.chartHours) || 2);
+          });
+        });
+
+        // Station tabs (servicios completos)
+        $$(".station-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            setActiveStation(tab.dataset.stationTab);
+          });
+        });
+
+        // Contador actualización
+        setInterval(() => {
+          secondsSince++;
+          const el = $("[data-role='updated']");
+          if (el) el.textContent = `Actualizado hace ${secondsSince} s`;
+        }, 1000);
+      }
+
+      // ─── Init ─────────────────────────────────────────────────────────────────────
+      async function init() {
+        attachEvents();
+        await fetchAndUpdate();
+        await loadChart(2);
+        await loadReporteStats();
+        setActiveStation("heroes");
+
+        // Ocultar loading
+        const overlay = $("#loading-overlay");
+        if (overlay) {
+          overlay.style.opacity = "0";
+          overlay.style.transition = "opacity .4s";
+          setTimeout(() => overlay.remove(), 500);
+        }
+
+        // Refresco automático
+        setInterval(fetchAndUpdate, 30_000);
+        setInterval(
+          () =>
+            loadChart(
+              parseInt($(".chart-btn.active")?.dataset.chartHours || "2"),
+            ),
+          5 * 60_000,
+        );
+        setInterval(loadReporteStats, 60_000);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    </script>
+  </body>
+</html>

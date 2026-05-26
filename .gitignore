@@ -1,0 +1,12 @@
+@"
+venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+*.log
+
+models/*.pkl
+models/*.joblib
+static/oracleJDK-26/
+"@ | Set-Content .gitignore -Encoding UTF8
