@@ -1048,6 +1048,72 @@
       .header-meta {
         gap: 18px !important;
       }
+
+      .line-view {
+        position: relative !important;
+        padding: 38px 48px 28px !important;
+        overflow: hidden !important;
+      }
+
+      .line-view::before {
+        display: none !important;
+      }
+
+      .line-stations {
+        position: relative !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-around !important;
+        padding: 0 0 8px !important;
+        z-index: 1 !important;
+      }
+
+
+      .line-stations::before {
+        content: "";
+        position: absolute;
+        left: 14%;
+        right: 14%;
+        top: 18px;
+        height: 7px;
+        background: repeating-linear-gradient(
+        90deg,
+        #2c2c2c 0px,
+        #2c2c2c 18px,
+        transparent 18px,
+        transparent 27px
+        );
+        border-radius: 999px;
+        z-index: 0;
+      }
+
+      .station-stop {
+        position: relative !important;
+        z-index: 2 !important;
+        gap: 8px !important;
+      }
+
+      .station-dot {
+        position: relative !important;
+        z-index: 3 !important;
+        background: #171717 !important;
+      }
+
+      .station-name {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+      }
+
+      .bus-icon {
+        position: absolute !important;
+        top: 19px !important;
+        bottom: auto !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 3 !important;
+        font-size: 30px !important;
+        line-height: 1 !important;
+      }
     </style>
   </head>
   <body>
@@ -1772,8 +1838,10 @@ function getRutaColor(ruta) {
 
         // Bus icon — color de la estación activa
         const busEl = $("#bus-icon");
+
         if (busEl) {
           const niv = data.congestion_map[activeStation] || "BAJO";
+          busEl.textContent = "🚌";
           busEl.style.filter = `drop-shadow(0 0 8px ${CONG_COLORS[niv].dot})`;
         }
 
@@ -2271,8 +2339,7 @@ function getRutaColor(ruta) {
       }
       
       async function init() {
-        updateTopDateTime();
-        setInterval(updateTopDateTime, 1000);
+        updateTopDateTime();setInterval(updateTopDateTime, 1000);
         attachEvents();
         await fetchAndUpdate();
         await loadChart(2);
