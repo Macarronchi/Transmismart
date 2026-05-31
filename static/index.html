@@ -1496,6 +1496,32 @@
         calle85: "#f59e0b",
         heroes: "#ef4444",
       };
+
+      const RUTA_COLORS = {
+        A: "#2563eb",
+        B: "#22c55e",
+        C: "#facc15",
+        D: "#3b82f6",
+        E: "#dc2626",
+        F: "#1e40af",
+        G: "#06b6d4",
+        H: "#f97316",
+        J: "#06b6d4",
+        K: "#d6b879",
+        L: "#14b8a6",
+      };
+
+function getRutaColor(ruta) {
+  const r = String(ruta || "").trim().toUpperCase();
+
+  // Rutas fáciles o numéricas: 4, 6, 8, etc.
+  if (/^\d+$/.test(r)) {
+    return "#ffffff";
+  }
+
+  const letra = r.charAt(0);
+  return RUTA_COLORS[letra] || "#ffffff";
+}
       const STATION_NAMES = {
         calle76: "Calle 76",
         calle85: "Calle 85",
@@ -1897,9 +1923,9 @@
             .map(
               (r) => `
       <div style="display:flex;align-items:center;justify-content:space-between;
-        padding:8px 0;border-bottom:1px solid var(--border);">
+        padding:8px 0;border-bottom:1px solid ${getRutaColor(r.ruta)}33;">
         <div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:${STATION_COLORS[key]};">${r.ruta}</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:${getRutaColor(r.ruta)};">${r.ruta}</div>
           <div style="font-size:11px;color:var(--text2);">${r.destino}</div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;background:var(--bg3);
@@ -1929,9 +1955,9 @@
           grid.innerHTML = data.rutas
             .map(
               (r) => `
-      <div class="service-item">
+      <div class="service-item" style="border-color:${getRutaColor(r.ruta)}33;">
         <div class="svc-header">
-          <div class="svc-ruta" style="color:${STATION_COLORS[key]};">${r.ruta}</div>
+          <div class="svc-ruta" style="color:${getRutaColor(r.ruta)};">${r.ruta}</div>
           <div class="svc-tiempo">⏱ ${r.tiempo_min} min</div>
         </div>
         <div class="svc-destino">→ ${r.destino}</div>
