@@ -202,18 +202,18 @@
       .line-view::before {
         content: "";
         position: absolute;
-        left: 0;
-        right: 0;
+        left: 8%;
+        right: 8%;
         top: 50%;
-        height: 3px;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          var(--border) 10%,
-          var(--border) 90%,
-          transparent 100%
-        );
+        height: 6px;
+        background: repeating-linear-gradient(
+        90deg,
+        #2f2f2f 0 18px,
+        transparent 18px 28px
+        ) !important;
+        border-radius: 999px;
         transform: translateY(-50%);
+        opacity: 0.9;
       }
       .line-stations {
         display: flex;
@@ -1026,6 +1026,28 @@
         fill: none;
         stroke-width: 2.2;
       }
+
+      .top-date-time {
+        text-align: right;
+        min-width: 180px;
+      }
+      #top-clock {
+        color: #facc15;
+        font-weight: 800;
+        font-size: 14px;
+        letter-spacing: 0.04em;
+      }
+
+
+      #top-date {
+        color: var(--text2);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      .header-meta {
+        gap: 18px !important;
+      }
     </style>
   </head>
   <body>
@@ -1048,6 +1070,10 @@
           </div>
         </div>
         <div class="header-meta">
+          <div class="top-date-time">
+            <div id="top-clock">--:-- --</div>
+            <div id="top-date">—</div>
+          </div>
           <div class="live-badge">
             <div class="live-dot"></div>
             EN VIVO
@@ -1693,11 +1719,17 @@ function getRutaColor(ruta) {
           }
           applyBadge($(`#badge-${key}`), niv);
 
-          // Card
           const card = $(`#card-${key}`);
           if (card) {
             card.style.borderColor = c.border;
             card.style.boxShadow = `0 0 20px ${c.glow}`;
+            const pin = card.querySelector(".pin-icon");
+            if (pin) {
+              pin.style.color = c.dot;
+              pin.style.background = c.glow;
+              pin.style.borderColor = c.dot;
+              pin.style.boxShadow = `0 0 16px ${c.glow}`;
+            }
           }
           applyBadge($(`#sc-badge-${key}`), niv);
 
@@ -2213,7 +2245,34 @@ function getRutaColor(ruta) {
       }
 
       // ─── Init ─────────────────────────────────────────────────────────────────────
+
+      function updateTopDateTime() {
+        const now = new Date();
+        const clockEl = $("#top-clock");
+        const dateEl = $("#top-date");
+  
+        if (clockEl) {
+          clockEl.textContent = now.toLocaleTimeString("es-CO", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+          });
+        }
+
+        if (dateEl) {
+          dateEl.textContent = now.toLocaleDateString("es-CO", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+        }
+      }
+      
       async function init() {
+        updateTopDateTime();
+        setInterval(updateTopDateTime, 1000);
         attachEvents();
         await fetchAndUpdate();
         await loadChart(2);
