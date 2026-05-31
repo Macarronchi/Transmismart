@@ -6,8 +6,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
-      rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
@@ -976,6 +976,56 @@
       footer {
         border-color: #292929 !important;
       }
+      body,
+      button,
+      input,
+      select,
+      textarea {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+      }
+      h1,
+      .card-title,
+      .sc-name,
+      .sc-val,
+      .rec-name,
+      .global-pct,
+      .svc-ruta,
+      .footer-brand {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        letter-spacing: -0.02em;
+      }
+      .station-name,
+      .sc-name {
+        color: #ffffff !important;
+      }
+      .station-stop .station-name {
+        color: #ffffff !important;
+        font-weight: 700;
+      }
+      .sc-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .pin-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid currentColor;
+        box-shadow: 0 0 16px color-mix(in srgb, currentColor 35%, transparent);
+        flex-shrink: 0;
+      }
+      .pin-icon svg {
+        width: 17px;
+        height: 17px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2.2;
+      }
     </style>
   </head>
   <body>
@@ -1091,7 +1141,15 @@
               onclick="setActiveStation('calle76')"
             >
               <div class="sc-header">
-                <div class="sc-name" style="color: var(--c76)">Calle 76</div>
+                <div class="sc-title" style="color: var(--c76)">
+                  <span class="pin-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"></path>
+                      <circle cx="12" cy="9" r="2.5"></circle>
+                    </svg>
+                  </span>
+                  <div class="sc-name">Calle 76</div>
+                </div>
                 <div class="sc-badge" id="sc-badge-calle76">—</div>
               </div>
               <div class="sc-val" id="sc-val-calle76">—</div>
@@ -1112,7 +1170,15 @@
               onclick="setActiveStation('calle85')"
             >
               <div class="sc-header">
-                <div class="sc-name" style="color: var(--c85)">Calle 85</div>
+                <div class="sc-title" style="color: var(--c85)">
+                  <span class="pin-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"></path>
+                      <circle cx="12" cy="9" r="2.5"></circle>
+                    </svg>
+                  </span>
+                  <div class="sc-name">Calle 85</div>
+                </div>
                 <div class="sc-badge" id="sc-badge-calle85">—</div>
               </div>
               <div class="sc-val" id="sc-val-calle85">—</div>
@@ -1133,7 +1199,15 @@
               onclick="setActiveStation('heroes')"
             >
               <div class="sc-header">
-                <div class="sc-name" style="color: var(--hero)">Los Héroes</div>
+                <div class="sc-title" style="color: var(--hero)">
+                  <span class="pin-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"></path>
+                      <circle cx="12" cy="9" r="2.5"></circle>
+                    </svg>
+                  </span>
+                  <div class="sc-name">Los Héroes</div>
+                </div>
                 <div class="sc-badge" id="sc-badge-heroes">—</div>
               </div>
               <div class="sc-val" id="sc-val-heroes">—</div>
