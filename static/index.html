@@ -897,6 +897,85 @@
         background: var(--border);
         border-radius: 3px;
       }
+
+      :root {
+        --bg: #000000;
+        --bg2: #141414;
+        --bg3: #1b1b1b;
+        --border: #303030;
+        --text: #f3f4f6;
+        --text2: #b8bec9;
+        --text3: #717b8c;
+      }
+
+      body {
+        background: #000000 !important;
+      }
+
+      body::before {
+        display: none !important;
+      }
+      .card,
+      .station-card,
+      .rec-card,
+      .franja-row,
+      .chart-wrap,
+      .report-form-card,
+      .stats-card,
+      .service-item,
+      .line-view,
+      .ultimo-item {
+        background: #171717 !important;
+        border-color: #303030 !important;
+        box-shadow: none;
+      }
+      .line-view,
+      .service-item,
+      .ultimo-item,
+      textarea,
+      .station-select {
+        background: #1d1d1d !important;
+      }
+      textarea,
+      .station-select {
+        border-color: #333333 !important;
+        color: #f3f4f6 !important;
+      }
+      .station-card {
+        background: #171717 !important;
+      }
+      .line-view::before {
+        background: linear-gradient(
+        90deg,
+        transparent 0%,
+        #2f2f2f 10%,
+        #2f2f2f 90%,
+        transparent 100%
+        ) !important;
+      }
+      .station-tab {
+        background: #1b1b1b !important;
+        border-color: #333333 !important;
+        color: #b8bec9 !important;
+      }
+
+      .station-tab.active {
+        color: #ffffff !important;
+      }
+      .chart-wrap {
+        background: #151515 !important;
+      }
+      .sc-bar-wrap {
+        background: #2a2a2a !important;
+      }
+      .services-grid .service-item {
+        background: #171717 !important;
+        border-color: #303030 !important;
+      }
+      header,
+      footer {
+        border-color: #292929 !important;
+      }
     </style>
   </head>
   <body>
