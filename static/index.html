@@ -45,7 +45,7 @@
       }
 
       body {
-        background: var(--bg);
+        background: #000;
         color: var(--text);
         font-family: "DM Sans", sans-serif;
         font-size: 15px;
@@ -56,6 +56,7 @@
 
       /* ── Background mesh ── */
       body::before {
+        display: none;
         content: "";
         position: fixed;
         inset: 0;
@@ -1015,7 +1016,7 @@
                 <div class="sc-badge" id="sc-badge-calle76">—</div>
               </div>
               <div class="sc-val" id="sc-val-calle76">—</div>
-              <div class="sc-label">pasajeros / 15 min</div>
+              <div class="sc-label">índice de congestión</div>
               <div class="sc-bar-wrap">
                 <div class="sc-bar" id="sc-bar-calle76"></div>
               </div>
@@ -1036,7 +1037,7 @@
                 <div class="sc-badge" id="sc-badge-calle85">—</div>
               </div>
               <div class="sc-val" id="sc-val-calle85">—</div>
-              <div class="sc-label">pasajeros / 15 min</div>
+              <div class="sc-label">índice de congestión</div>
               <div class="sc-bar-wrap">
                 <div class="sc-bar" id="sc-bar-calle85"></div>
               </div>
@@ -1057,7 +1058,7 @@
                 <div class="sc-badge" id="sc-badge-heroes">—</div>
               </div>
               <div class="sc-val" id="sc-val-heroes">—</div>
-              <div class="sc-label">pasajeros / 15 min</div>
+              <div class="sc-label">índice de congestión</div>
               <div class="sc-bar-wrap">
                 <div class="sc-bar" id="sc-bar-heroes"></div>
               </div>
@@ -1441,6 +1442,22 @@
     padding:2px 10px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:.5px;`;
       }
 
+      function congestionPercent(p) { 
+        if (!p) return 0;
+        if (p.porcentaje_congestion !== undefined) {
+          return Math.round(p.porcentaje_congestion);
+        }
+        const ref = (Number(p.umbral_alto) || 80) * 1.5;
+        const val = Number(p.validaciones) || 0;
+        return Math.min(Math.round((val / ref) * 100), 100);
+      }
+      function intervalPercent(valor, key) {
+        const p = lastPrediction?.predicciones?.[key];
+        if (!p) return Number(valor) || 0;
+        const ref = (Number(p.umbral_alto) || 80) * 1.5;
+        return Math.min(Math.round(((Number(valor) || 0) / ref) * 100), 100);
+      }
+
       function setActiveStation(key) {
         activeStation = key;
         // Update tabs
@@ -1504,19 +1521,16 @@
           }
           applyBadge($(`#sc-badge-${key}`), niv);
 
+          const pctCongestion = congestionPercent(p);
           const valEl = $(`#sc-val-${key}`);
           if (valEl) {
-            valEl.textContent = p.validaciones;
+            valEl.textContent = `${pctCongestion}%`;
             valEl.style.color = c.dot;
           }
 
           const bar = $(`#sc-bar-${key}`);
-          if (bar) {
-            const pct = Math.min(
-              Math.round((p.validaciones / (p.umbral_alto * 1.5 || 120)) * 100),
-              100,
-            );
-            bar.style.width = `${pct}%`;
+          if (bar) {       
+            bar.style.width = `${pctCongestion}%`;
             bar.style.background = c.dot;
           }
 
@@ -1566,14 +1580,16 @@
             nameEl.style.color = c.dot;
           }
           applyBadge($("#rec-level"), rec.congestion);
+          const recPred = data.predicciones?.[rec.station_key];
+          const recPct = congestionPercent(recPred);
           const motEl = $("#rec-motivo");
-          if (motEl) motEl.textContent = rec.motivo;
-          const valEl = $("#rec-val");
-          if (valEl)
-            valEl.textContent = `~${rec.validaciones} pasajeros esperados`;
-        }
-
-        secondsSince = 0;
+          if (motEl)
+          motEl.textContent = `Nivel '${rec.congestion}' con ${recPct}% de congestión estimada.`;
+        const valEl = $("#rec-val");
+        if (valEl)
+        valEl.textContent = `${recPct}% de congestión estimada`;
+      }
+      secondsSince = 0;
       }
 
       // ─── Fetch predicción ─────────────────────────────────────────────────────────
@@ -1654,6 +1670,10 @@
           cong: iv.cong_heroes,
         }));
 
+        const data76 = intervalos.map((iv) => intervalPercent(iv.calle76, "calle76"));
+        const data85 = intervalos.map((iv) => intervalPercent(iv.calle85, "calle85"));
+        const dataHeroes = intervalos.map((iv) => intervalPercent(iv.heroes, "heroes"));
+
         chartInstance = new Chart(canvas.getContext("2d"), {
           type: "line",
           data: {
@@ -1661,7 +1681,7 @@
             datasets: [
               {
                 label: "Calle 76",
-                data: intervalos.map((iv) => iv.calle76),
+                data: data76,
                 borderColor: "#3b82f6",
                 backgroundColor: "#3b82f611",
                 pointBackgroundColor: intervalos.map(
@@ -1674,7 +1694,7 @@
               },
               {
                 label: "Calle 85",
-                data: intervalos.map((iv) => iv.calle85),
+                data: data85,
                 borderColor: "#f59e0b",
                 backgroundColor: "#f59e0b11",
                 pointBackgroundColor: intervalos.map(
@@ -1687,7 +1707,7 @@
               },
               {
                 label: "Los Héroes",
-                data: intervalos.map((iv) => iv.heroes),
+                data: dataHeroes,
                 borderColor: "#ef4444",
                 backgroundColor: "#ef444411",
                 pointBackgroundColor: intervalos.map(
@@ -1720,7 +1740,7 @@
                     const key = keys[ctx.datasetIndex];
                     const cg = iv[`cong_${key}`];
                     const em = { BAJO: "", MEDIO: "", ALTO: "" }[cg] || "";
-                    return ` ${ctx.dataset.label}: ${ctx.parsed.y} pax ${em}`;
+                    return ` ${ctx.dataset.label}: ${ctx.parsed.y}% ${em}`;
                   },
                 },
               },
@@ -1771,11 +1791,11 @@
                 ticks: { color: "#4a607a" },
                 title: {
                   display: true,
-                  text: "Pasajeros / 15 min",
+                  text: "% de congestión",
                   color: "#4a607a",
                   font: { size: 11 },
                 },
-                min: 0,
+                max: 100,
               },
             },
           },
