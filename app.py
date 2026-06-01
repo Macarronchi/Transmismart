@@ -755,6 +755,66 @@ def report_stats():
     except Exception as e:
         log.error(f"Error en /report/stats: {e}")
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/report/comments/<station_key>", methods=["GET"])
+def report_comments(station_key):
+    """Comentarios reales de ciudadanos por estación."""
+    if station_key not in NOMBRES:
+        return jsonify({"error": "Estación no encontrada"}), 404
+
+    limit = min(int(request.args.get("limit", 6)), 30)
+
+    total_reportes = (
+        db.session.query(ReporteCiudadano)
+        .filter_by(station_key=station_key)
+        .count()
+    )
+
+    reportes_con_comentario = (
+        db.session.query(ReporteCiudadano)
+        .filter(ReporteCiudadano.station_key == station_key)
+        .filter(ReporteCiudadano.comentario.isnot(None))
+        .filter(ReporteCiudadano.comentario != "")
+        .order_by(ReporteCiudadano.timestamp.desc())
+        .limit(limit)
+        .all()
+    )
+
+    distribucion = {
+        nivel: (
+            db.session.query(ReporteCiudadano)
+            .filter_by(station_key=station_key, nivel_usuario=nivel)
+            .count()
+        )
+        for nivel in CONGESTION_LABELS
+    }
+
+    nivel_mas_reportado = max(
+        distribucion,
+        key=lambda n: distribucion[n]
+    ) if total_reportes > 0 else None
+
+    return jsonify({
+        "station_key": station_key,
+        "station_name": NOMBRES[station_key],
+        "total_reportes": total_reportes,
+        "total_con_comentario": len(reportes_con_comentario),
+        "distribucion": distribucion,
+        "nivel_mas_reportado": nivel_mas_reportado,
+        "comentarios": [
+            {
+                "id": r.id,
+                "station": r.station_name,
+                "nivel_usuario": r.nivel_usuario,
+                "nivel_modelo": r.nivel_modelo,
+                "coincide": r.coincide,
+                "comentario": r.comentario,
+                "franja": r.franja,
+                "timestamp": r.timestamp.isoformat() if r.timestamp else None,
+            }
+            for r in reportes_con_comentario
+        ],
+    })
 
 
 @app.route("/feedback", methods=["POST"])

@@ -1126,6 +1126,124 @@
       .station-stop .level-badge {
         margin-top: 2px;
       }
+
+      .user-comments-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .user-comments-title {
+        color: #f87171;
+        font-weight: 800;
+        font-size: 18px;
+      }
+
+      .user-comments-subtitle {
+        color: var(--text2);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+
+      .user-report-summary {
+        border: 1px solid rgba(248, 113, 113, 0.45);
+        border-radius: 10px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        background: rgba(127, 29, 29, 0.18);
+      }
+
+
+      .user-report-number {
+        color: #fb7185;
+        font-size: 24px;
+        font-weight: 900;
+      }
+
+      .user-report-text {
+        color: #d1d5db;
+        font-size: 12px;
+        text-align: right;
+      }
+
+      .user-report-number {
+        color: #fb7185;
+        font-size: 24px;
+        font-weight: 900;
+      }
+
+      .user-report-text {
+        color: #d1d5db;
+        font-size: 12px;
+        text-align: right;
+      }
+
+      .user-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+
+      .user-tag {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(127, 29, 29, 0.55);
+        border: 1px solid rgba(248, 113, 113, 0.45);
+        color: #fecaca;
+      }
+
+      .user-comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .user-comment-item {
+        border: 1px solid rgba(248, 113, 113, 0.35);
+        background: rgba(69, 10, 10, 0.25);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+
+      .user-comment-text {
+        color: #f9fafb;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .user-comment-meta {  
+        margin-top: 6px;  
+        font-size: 11px;  
+        color: #9ca3af;  
+        display: flex;  
+        gap: 8px;
+        align-items: center;
+      }
+
+      .user-comment-badge {
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 999px;
+        color: #fff;
+      }
+
+      .empty-comments {  
+        color: var(--text3); 
+        font-size: 13px; 
+        padding: 12px; 
+        text-align: center;
+        border: 1px dashed #333;
+        border-radius: 10px;
+      }
     </style>
   </head>
   <body>
@@ -1605,32 +1723,32 @@
               <div class="sstat-pct" id="sstat-pct-heroes">—</div>
             </div>
           </div>
-          <!-- Últimos reportes -->
+          <!-- Comentarios reales por estación -->
           <div style="margin-top: 16px">
-            <div
-              style="
-                font-size: 11px;
-                color: var(--text3);
-                text-transform: uppercase;
-                letter-spacing: 0.6px;
-                margin-bottom: 10px;
-              "
-            >
-              Últimos reportes
-            </div>
-            <div class="ultimos-list" id="ultimos-list">
-              <div
-                style="
-                  color: var(--text3);
-                  font-size: 12px;
-                  text-align: center;
-                  padding: 10px;
-                "
-              >
-                Sin reportes aún
+            <div class="user-comments-header">
+              <div>
+                <div class="user-comments-title" id="usuarios-nivel-titulo">
+                  Reportes de usuarios
+                </div>
+                <div class="user-comments-subtitle">
+                  Comentarios reales guardados en la base de datos
+                </div>
               </div>
             </div>
-          </div>
+
+  <div class="user-report-summary">
+    <div class="user-report-number" id="usuarios-total">0</div>
+    <div class="user-report-text" id="usuarios-total-label">
+      reportes ciudadanos para esta estación
+    </div>
+  </div>
+
+  <div class="user-tags" id="usuarios-tags"></div>
+
+  <div class="user-comments-list" id="comparacion-comentarios">
+    <div class="empty-comments">Cargando comentarios reales…</div>
+  </div>
+</div>
         </div>
       </div>
 
@@ -1700,6 +1818,122 @@ function getRutaColor(ruta) {
   const letra = r.charAt(0);
   return RUTA_COLORS[letra] || "#ffffff";
 }
+
+function escapeHtml(text) {
+  return String(text || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function nivelTexto(nivel) {
+  if (!nivel) return "Sin reportes";
+  const lower = nivel.toLowerCase();
+  return `Congestión ${lower.charAt(0).toUpperCase() + lower.slice(1)}`;
+}
+
+function tiempoRelativo(timestamp) {
+  if (!timestamp) return "";
+
+  const fecha = new Date(timestamp);
+  const ahora = new Date();
+  const diffMs = ahora - fecha;
+  const diffMin = Math.floor(diffMs / 60000);
+
+  if (diffMin < 1) return "hace unos segundos";
+  if (diffMin < 60) return `hace ${diffMin} min`;
+
+  const diffHoras = Math.floor(diffMin / 60);
+  if (diffHoras < 24) return `hace ${diffHoras} h`;
+
+  const diffDias = Math.floor(diffHoras / 24);
+  return `hace ${diffDias} d`;
+}
+
+async function loadComentariosCiudadanos(stationKey) {
+  const cont = $("#comparacion-comentarios");
+  if (!cont) return;
+
+  cont.innerHTML = `<div class="empty-comments">Cargando comentarios reales…</div>`;
+
+  try {
+    const resp = await fetch(`${API_BASE}/report/comments/${stationKey}?limit=6`);
+    const data = await resp.json();
+
+    const titulo = $("#usuarios-nivel-titulo");
+    if (titulo) {
+      titulo.textContent = data.nivel_mas_reportado
+        ? nivelTexto(data.nivel_mas_reportado)
+        : "Reportes de usuarios";
+    }
+
+    const total = $("#usuarios-total");
+    if (total) total.textContent = data.total_reportes ?? 0;
+
+    const totalLabel = $("#usuarios-total-label");
+    if (totalLabel) {
+      totalLabel.textContent = `reportes ciudadanos para ${data.station_name}`;
+    }
+
+    const tags = $("#usuarios-tags");
+    if (tags) {
+      const dist = data.distribucion || {};
+      tags.innerHTML = ["BAJO", "MEDIO", "ALTO"]
+        .filter((nivel) => (dist[nivel] || 0) > 0)
+        .map((nivel) => {
+          const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
+          return `
+            <span class="user-tag" style="border-color:${c.dot};color:${c.text};background:${c.glow};">
+              ${nivel}: ${dist[nivel]}
+            </span>
+          `;
+        })
+        .join("");
+    }
+
+    const comentarios = data.comentarios || [];
+
+    if (!comentarios.length) {
+      cont.innerHTML = `
+        <div class="empty-comments">
+          Todavía no hay comentarios escritos para ${data.station_name}.
+        </div>
+      `;
+      return;
+    }
+
+    cont.innerHTML = comentarios
+      .map((r) => {
+        const c = CONG_COLORS[r.nivel_usuario] || CONG_COLORS.BAJO;
+
+        return `
+          <div class="user-comment-item">
+            <div class="user-comment-text">
+              ${escapeHtml(r.comentario)}
+            </div>
+            <div class="user-comment-meta">
+              <span class="user-comment-badge" style="background:${c.bg};">
+                ${r.nivel_usuario}
+              </span>
+              <span>${escapeHtml(r.franja || "")}</span>
+              <span>${tiempoRelativo(r.timestamp)}</span>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+  } catch (e) {
+    console.error("Error cargando comentarios reales:", e);
+    cont.innerHTML = `
+      <div class="empty-comments">
+        Error cargando comentarios desde la base de datos.
+      </div>
+    `;
+  }
+}
       const STATION_NAMES = {
         calle76: "Calle 76",
         calle85: "Calle 85",
@@ -1757,6 +1991,7 @@ function getRutaColor(ruta) {
         loadServiciosFull(key);
         // Update servicios title in right panel
         $("#servicios-titulo").textContent = STATION_NAMES[key];
+        loadComentariosCiudadanos(key);
       }
 
       // ─── Predicción → UI ──────────────────────────────────────────────────────────
@@ -2286,14 +2521,21 @@ function getRutaColor(ruta) {
                       minute: "2-digit",
                     })
                   : "";
+                const comentario = (r.comentario || "").trim();
                 return `
-          <div class="ultimo-item">
-            <span class="ui-station">${r.station}</span>
-            <span class="ui-nivel" style="background:${c.bg};color:#fff;border-radius:999px;padding:2px 8px;">${r.nivel_usuario}</span>
-            <span class="ui-match">${r.coincide ? "" : ""}</span>
-            <span class="ui-time">${ts}</span>
-          </div>
-        `;
+                <div class="ultimo-item" style="align-items:flex-start;flex-direction:column;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:10px;width:100%;">
+                    <span class="ui-station">${r.station}</span>
+                    <span class="ui-nivel" style="background:${c.bg};color:#fff;border-radius:999px;padding:2px 8px;">
+                      ${r.nivel_usuario}
+                      </span>
+                      <span class="ui-time">${ts}</span>
+                      </div>
+                      <div style="font-size:12px;color:var(--text2);line-height:1.4;width:100%;">
+                        ${comentario ? comentario : "Sin comentario escrito"}
+                        </div>
+                        </div>
+                        `;
               })
               .join("");
           } else if (ul) {
