@@ -345,6 +345,17 @@ def _congestion_from_val(key, val):
     if val < u["p66"]: return "MEDIO"
     return "ALTO"
 
+def _porcentaje_congestion(key, val):
+    """
+    Convierte las validaciones estimadas en un porcentaje comparable de congestión.
+    Usa el umbral alto de cada estación como referencia.
+    """
+    umbral_alto = UMBRALES.get(key, {}).get("p66", 80)
+    referencia = max(float(umbral_alto) * 1.5, 1)
+
+    pct = round((float(val) / referencia) * 100)
+    return max(0, min(pct, 100))
+
 def _cache_key(prefix, dt, extra=""):
     """
     Crea una clave única para cachear predicciones por bloque de 15 minutos.
@@ -388,8 +399,10 @@ def _guardar_cache_prediccion(slot_key, payload):
 def predecir_todas(dt, lags=None, save_to_db=False):
     lags = lags or {}
     resultados = {}
-    for key in ["calle76","calle85","heroes"]:
+
+    for key in ["calle76", "calle85", "heroes"]:
         X = _extraer_features(dt, key, lags.get(key))
+
         if MODELOS.get(key):
             reg       = MODELOS[key]["reg"]
             clf       = MODELOS[key]["clf"]
@@ -404,21 +417,31 @@ def predecir_todas(dt, lags=None, save_to_db=False):
             clf_idx   = CONGESTION_LABELS.index(cong)
             clf_proba = [0.1, 0.1, 0.1]
             clf_proba[clf_idx] = 0.8
+
+        pct_congestion = _porcentaje_congestion(key, val)
+
         resultados[key] = {
-            "nombre":         NOMBRES[key],
-            "validaciones":   val,
-            "congestion":     cong,
-            "probabilidades": {CONGESTION_LABELS[i]: round(float(p), 3)
-                               for i, p in enumerate(clf_proba)},
-            "confianza":      round(float(clf_proba[clf_idx]), 3),
-            "umbral_bajo":    UMBRALES.get(key, {}).get("p33", 40),
-            "umbral_alto":    UMBRALES.get(key, {}).get("p66", 80),
-            "color":          COLORES[key],
+            "nombre": NOMBRES[key],
+            "validaciones": val,
+            "porcentaje_congestion": pct_congestion,
+            "congestion": cong,
+            "probabilidades": {
+                CONGESTION_LABELS[i]: round(float(p), 3)
+                for i, p in enumerate(clf_proba)
+            },
+            "confianza": round(float(clf_proba[clf_idx]), 3),
+            "umbral_bajo": UMBRALES.get(key, {}).get("p33", 40),
+            "umbral_alto": UMBRALES.get(key, {}).get("p66", 80),
+            "color": COLORES[key],
         }
 
     orden = {"BAJO": 0, "MEDIO": 1, "ALTO": 2}
+
+    # Recomendación correcta: estación con MENOR porcentaje de congestión
     mejor = min(resultados, key=lambda k: (
-        orden[resultados[k]["congestion"]], resultados[k]["validaciones"]
+        resultados[k]["porcentaje_congestion"],
+        orden[resultados[k]["congestion"]],
+        resultados[k]["validaciones"],
     ))
 
     # Guardar predicciones en PostgreSQL
@@ -438,27 +461,34 @@ def predecir_todas(dt, lags=None, save_to_db=False):
                     franja=_franja(dt.hour),
                 )
                 db.session.add(registro)
+
             db.session.commit()
+
         except Exception as e:
             log.warning(f"No se pudo guardar predicción en DB: {e}")
             db.session.rollback()
 
     return {
-        "timestamp":    dt.strftime("%Y-%m-%dT%H:%M"),
-        "dia_semana":   DIAS_ES[dt.weekday()],
-        "franja":       _franja(dt.hour),
+        "timestamp": dt.strftime("%Y-%m-%dT%H:%M"),
+        "dia_semana": DIAS_ES[dt.weekday()],
+        "franja": _franja(dt.hour),
         "predicciones": resultados,
         "recomendacion": {
-            "station_key":  mejor,
+            "station_key": mejor,
             "station_name": NOMBRES[mejor],
-            "congestion":   resultados[mejor]["congestion"],
+            "congestion": resultados[mejor]["congestion"],
             "validaciones": resultados[mejor]["validaciones"],
-            "motivo": (f"Nivel '{resultados[mejor]['congestion']}' con "
-                       f"~{resultados[mejor]['validaciones']} pasajeros esperados."),
+            "porcentaje_congestion": resultados[mejor]["porcentaje_congestion"],
+            "motivo": (
+                f"Nivel '{resultados[mejor]['congestion']}' con "
+                f"{resultados[mejor]['porcentaje_congestion']}% de congestión estimada."
+            ),
         },
-        "congestion_map": {k: v["congestion"] for k, v in resultados.items()},
+        "congestion_map": {
+            k: v["congestion"]
+            for k, v in resultados.items()
+        },
     }
-
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
