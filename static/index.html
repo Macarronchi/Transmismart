@@ -1869,31 +1869,35 @@ async function loadComentariosCiudadanos(stationKey) {
         : "Reportes de usuarios";
     }
 
-    const total = $("#usuarios-total");
-    if (total) total.textContent = data.total_reportes ?? 0;
-
-    const totalLabel = $("#usuarios-total-label");
-    if (totalLabel) {
-      totalLabel.textContent = `reportes ciudadanos para ${data.station_name}`;
-    }
+   const comentarios = data.comentarios || [];
+   const total = $("#usuarios-total");
+   if (total) total.textContent = data.total_con_comentario ?? comentarios.length;
+   const totalLabel = $("#usuarios-total-label");
+   if (totalLabel) {
+  totalLabel.textContent = `comentarios reales para ${data.station_name}`;
+}
 
     const tags = $("#usuarios-tags");
     if (tags) {
-      const dist = data.distribucion || {};
+      const distComentarios = { BAJO: 0, MEDIO: 0, ALTO: 0 };
+
+      comentarios.forEach((r) => {
+        if (distComentarios[r.nivel_usuario] !== undefined) {
+          distComentarios[r.nivel_usuario]++;
+        }
+      });
       tags.innerHTML = ["BAJO", "MEDIO", "ALTO"]
-        .filter((nivel) => (dist[nivel] || 0) > 0)
-        .map((nivel) => {
-          const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
-          return `
-            <span class="user-tag" style="border-color:${c.dot};color:${c.text};background:${c.glow};">
-              ${nivel}: ${dist[nivel]}
-            </span>
+      .filter((nivel) => distComentarios[nivel] > 0)
+      .map((nivel) => { 
+        const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO; 
+        return `
+        <span class="user-tag" style="border-color:${c.dot};color:${c.text};background:${c.glow};">
+          ${nivel}: ${distComentarios[nivel]}
+          </span> 
           `;
         })
         .join("");
-    }
-
-    const comentarios = data.comentarios || [];
+      }
 
     if (!comentarios.length) {
       cont.innerHTML = `
@@ -2442,7 +2446,9 @@ async function loadComentariosCiudadanos(stationKey) {
           if (data.ok) {
             if ($("#comentario")) $("#comentario").value = "";
             $$(".nivel-btn").forEach((b) => b.classList.remove("selected"));
-            loadReporteStats();
+            setActiveStation(station);
+            await loadReporteStats();
+            await loadComentariosCiudadanos(station);
           }
         } catch (e) {
           showReporteResult({ ok: false, mensaje: `Error: ${e.message}` });
