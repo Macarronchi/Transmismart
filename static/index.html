@@ -6,8 +6,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
@@ -207,9 +207,9 @@
         top: 50%;
         height: 6px;
         background: repeating-linear-gradient(
-        90deg,
-        #2f2f2f 0 18px,
-        transparent 18px 28px
+          90deg,
+          #2f2f2f 0 18px,
+          transparent 18px 28px
         ) !important;
         border-radius: 999px;
         transform: translateY(-50%);
@@ -960,11 +960,11 @@
       }
       .line-view::before {
         background: linear-gradient(
-        90deg,
-        transparent 0%,
-        #2f2f2f 10%,
-        #2f2f2f 90%,
-        transparent 100%
+          90deg,
+          transparent 0%,
+          #2f2f2f 10%,
+          #2f2f2f 90%,
+          transparent 100%
         ) !important;
       }
       .station-tab {
@@ -995,7 +995,13 @@
       input,
       select,
       textarea {
-        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif !important;
       }
       h1,
       .card-title,
@@ -1005,7 +1011,13 @@
       .global-pct,
       .svc-ruta,
       .footer-brand {
-        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif !important;
         letter-spacing: -0.02em;
       }
       .station-name,
@@ -1028,7 +1040,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255,255,255,0.06);
+        background: rgba(255, 255, 255, 0.06);
         border: 1px solid currentColor;
         box-shadow: 0 0 16px color-mix(in srgb, currentColor 35%, transparent);
         flex-shrink: 0;
@@ -1051,7 +1063,6 @@
         font-size: 14px;
         letter-spacing: 0.04em;
       }
-
 
       #top-date {
         color: var(--text2);
@@ -1082,7 +1093,6 @@
         z-index: 1 !important;
       }
 
-
       .line-stations::before {
         content: "";
         position: absolute;
@@ -1091,11 +1101,11 @@
         top: 18px;
         height: 7px;
         background: repeating-linear-gradient(
-        90deg,
-        #2c2c2c 0px,
-        #2c2c2c 18px,
-        transparent 18px,
-        transparent 27px
+          90deg,
+          #2c2c2c 0px,
+          #2c2c2c 18px,
+          transparent 18px,
+          transparent 27px
         );
         border-radius: 999px;
         z-index: 0;
@@ -1146,7 +1156,6 @@
         margin-top: 2px;
       }
 
-
       .user-report-summary {
         border: 1px solid rgba(248, 113, 113, 0.45);
         border-radius: 10px;
@@ -1157,7 +1166,6 @@
         margin-bottom: 14px;
         background: rgba(127, 29, 29, 0.18);
       }
-
 
       .user-report-number {
         color: #fb7185;
@@ -1219,11 +1227,11 @@
         line-height: 1.45;
       }
 
-      .user-comment-meta {  
-        margin-top: 6px;  
-        font-size: 11px;  
-        color: #9ca3af;  
-        display: flex;  
+      .user-comment-meta {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #9ca3af;
+        display: flex;
         gap: 8px;
         align-items: center;
       }
@@ -1236,13 +1244,261 @@
         color: #fff;
       }
 
-      .empty-comments {  
-        color: var(--text3); 
-        font-size: 13px; 
-        padding: 12px; 
+      .empty-comments {
+        color: var(--text3);
+        font-size: 13px;
+        padding: 12px;
         text-align: center;
         border: 1px dashed #333;
         border-radius: 10px;
+      }
+
+      /* ── Comparación IA vs Ciudadanos dividida en 2 ── */
+      .reports-section {
+        grid-template-columns: 1fr !important;
+      }
+
+      .ia-human-card {
+        order: -1;
+        padding: 0 !important;
+        overflow: hidden;
+      }
+
+      .ia-human-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 22px 24px;
+        border-bottom: 1px solid #303030;
+      }
+
+      .ia-human-sub {
+        color: var(--text2);
+        font-size: 13px;
+        max-width: 650px;
+      }
+
+      .compare-tabs {
+        display: flex;
+        gap: 6px;
+        background: #111;
+        padding: 4px;
+        border: 1px solid #333;
+        border-radius: 12px;
+        flex-shrink: 0;
+      }
+
+      .compare-tab {
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        padding: 8px 14px;
+        border-radius: 9px;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .compare-tab.active {
+        background: #facc15;
+        color: #000;
+      }
+
+      .ia-human-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      @media (max-width: 900px) {
+        .ia-human-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .ia-human-head {
+          flex-direction: column;
+        }
+      }
+
+      .compare-panel {
+        padding: 26px 24px;
+        min-height: 420px;
+      }
+
+      .ia-panel {
+        background: linear-gradient(
+          135deg,
+          rgba(245, 158, 11, 0.13),
+          rgba(0, 0, 0, 0.12)
+        );
+        border-right: 1px solid rgba(245, 158, 11, 0.45);
+      }
+
+      .human-panel {
+        background: linear-gradient(
+          135deg,
+          rgba(220, 38, 38, 0.13),
+          rgba(0, 0, 0, 0.12)
+        );
+      }
+
+      .compare-kicker {
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+        font-weight: 900;
+        margin-bottom: 6px;
+      }
+
+      .compare-title {
+        font-size: 24px;
+        font-weight: 900;
+        margin-bottom: 14px;
+      }
+
+      .ia-panel .compare-title {
+        color: #facc15;
+      }
+
+      .human-panel .compare-title {
+        color: #f87171;
+      }
+
+      .ia-current-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin: 16px 0;
+      }
+
+      .ia-big-number {
+        font-size: 56px;
+        font-weight: 900;
+        line-height: 1;
+        color: #facc15;
+      }
+
+      .ia-small-label {
+        color: var(--text2);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .ia-progress-wrap {
+        width: 100%;
+        height: 8px;
+        background: #2a2a2a;
+        border-radius: 999px;
+        overflow: hidden;
+        margin: 18px 0 22px;
+      }
+
+      .ia-progress-bar {
+        width: 0%;
+        height: 100%;
+        background: #facc15;
+        border-radius: 999px;
+        transition: width 0.4s ease;
+      }
+
+      .ia-data-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .ia-data-grid div {
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        padding: 14px;
+      }
+
+      .ia-data-grid span {
+        display: block;
+        color: var(--text3);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 5px;
+      }
+
+      .ia-data-grid strong {
+        color: #fff;
+        font-size: 18px;
+      }
+
+      .global-comparison-strip {
+        border-top: 1px solid #303030;
+        padding: 18px 24px;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 24px;
+        background: rgba(0, 0, 0, 0.25);
+      }
+
+      @media (max-width: 800px) {
+        .global-comparison-strip {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .global-strip-label {
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .global-strip-number {
+        color: var(--accent);
+        font-size: 34px;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      .global-strip-sub {
+        color: var(--text2);
+        font-size: 12px;
+      }
+
+      .global-station-mini {
+        display: grid;
+        gap: 8px;
+      }
+
+      .mini-station-row {
+        display: grid;
+        grid-template-columns: 12px 1fr 120px 60px;
+        align-items: center;
+        gap: 8px;
+        color: #f9fafb;
+        font-size: 13px;
+      }
+
+      .mini-station-row small {
+        color: var(--text3);
+        font-size: 11px;
+      }
+
+      .mini-station-row strong {
+        text-align: right;
+      }
+
+      .mini-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+      }
+
+      .report-form-card {
+        max-width: 720px;
+        width: 100%;
+        margin: 0 auto;
       }
     </style>
   </head>
@@ -1365,7 +1621,9 @@
                 <div class="sc-title" style="color: var(--c76)">
                   <span class="pin-icon">
                     <svg viewBox="0 0 24 24">
-                      <path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"></path>
+                      <path
+                        d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"
+                      ></path>
                       <circle cx="12" cy="9" r="2.5"></circle>
                     </svg>
                   </span>
@@ -1394,7 +1652,9 @@
                 <div class="sc-title" style="color: var(--c85)">
                   <span class="pin-icon">
                     <svg viewBox="0 0 24 24">
-                      <path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"></path>
+                      <path
+                        d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"
+                      ></path>
                       <circle cx="12" cy="9" r="2.5"></circle>
                     </svg>
                   </span>
@@ -1423,7 +1683,9 @@
                 <div class="sc-title" style="color: var(--hero)">
                   <span class="pin-icon">
                     <svg viewBox="0 0 24 24">
-                      <path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"></path>
+                      <path
+                        d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"
+                      ></path>
                       <circle cx="12" cy="9" r="2.5"></circle>
                     </svg>
                   </span>
@@ -1665,90 +1927,146 @@
         </div>
 
         <!-- Estadísticas -->
-        <div class="stats-card">
-          <div class="card-title" style="margin-bottom: 16px">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-            IA vs Ciudadanos
-          </div>
-          <div class="global-stat">
-            <div class="global-pct" id="global-pct">—</div>
-            <div class="global-sub">congestión combinada IA + ciudadanos</div>
-            <div
-              style="font-size: 11px; color: var(--text3); margin-top: 6px"
-              id="total-reportes"
-            >
-              Sin reportes aún
-            </div>
-          </div>
-          <div id="by-station-stats">
-            <div class="station-stat">
-              <div class="sstat-color" style="background: var(--c76)"></div>
-              <div class="sstat-name">
-                Calle 76
-                <div class="sstat-total" id="sstat-total-calle76">
-                  0 reportes
-                </div>
+        <!-- Comparación IA vs Ciudadanos -->
+        <div class="stats-card ia-human-card">
+          <div class="ia-human-head">
+            <div>
+              <div class="card-title" style="margin-bottom: 6px">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Comparación IA vs Ciudadanos
               </div>
-              <div class="sstat-pct" id="sstat-pct-calle76">—</div>
-            </div>
-            <div class="station-stat">
-              <div class="sstat-color" style="background: var(--c85)"></div>
-              <div class="sstat-name">
-                Calle 85
-                <div class="sstat-total" id="sstat-total-calle85">
-                  0 reportes
-                </div>
+              <div class="ia-human-sub">
+                Contraste entre la predicción del sistema y los reportes reales
+                guardados en la base de datos.
               </div>
-              <div class="sstat-pct" id="sstat-pct-calle85">—</div>
             </div>
-            <div class="station-stat">
-              <div class="sstat-color" style="background: var(--hero)"></div>
-              <div class="sstat-name">
+
+            <div class="compare-tabs">
+              <button class="compare-tab active" data-compare-station="heroes">
                 Los Héroes
-                <div class="sstat-total" id="sstat-total-heroes">
-                  0 reportes
-                </div>
-              </div>
-              <div class="sstat-pct" id="sstat-pct-heroes">—</div>
+              </button>
+              <button class="compare-tab" data-compare-station="calle76">
+                Calle 76
+              </button>
+              <button class="compare-tab" data-compare-station="calle85">
+                Calle 85
+              </button>
             </div>
           </div>
-          <!-- Comentarios reales por estación -->
-          <div style="margin-top: 16px">
-            <div class="user-comments-header">
-              <div>
-                <div class="user-comments-title" id="usuarios-nivel-titulo">
-                  Reportes de usuarios
+
+          <div class="ia-human-grid">
+            <!-- Panel IA -->
+            <section class="compare-panel ia-panel">
+              <div class="compare-kicker">Predicción IA</div>
+              <div class="compare-title" id="ia-station-name">—</div>
+
+              <div class="ia-current-row">
+                <div>
+                  <div class="ia-big-number" id="ia-pct">—</div>
+                  <div class="ia-small-label">
+                    índice de congestión estimado
+                  </div>
                 </div>
-                <div class="user-comments-subtitle">
-                  Comentarios reales guardados en la base de datos
+                <span class="level-badge" id="ia-level">—</span>
+              </div>
+
+              <div class="ia-progress-wrap">
+                <div class="ia-progress-bar" id="ia-bar"></div>
+              </div>
+
+              <div class="ia-data-grid">
+                <div>
+                  <span>Pasajeros</span>
+                  <strong id="ia-pasajeros">—</strong>
                 </div>
+                <div>
+                  <span>Confianza</span>
+                  <strong id="ia-confianza">—</strong>
+                </div>
+                <div>
+                  <span>Franja</span>
+                  <strong id="ia-franja">—</strong>
+                </div>
+                <div>
+                  <span>Fuente</span>
+                  <strong>Modelo IA</strong>
+                </div>
+              </div>
+            </section>
+
+            <!-- Panel Usuarios -->
+            <section class="compare-panel human-panel">
+              <div class="compare-kicker">Reportes ciudadanos</div>
+              <div
+                class="compare-title user-comments-title"
+                id="usuarios-nivel-titulo"
+              >
+                Reportes de usuarios
+              </div>
+
+              <div class="user-comments-subtitle">
+                Comentarios reales guardados en la base de datos
+              </div>
+
+              <div class="user-report-summary">
+                <div class="user-report-number" id="usuarios-total">0</div>
+                <div class="user-report-text" id="usuarios-total-label">
+                  comentarios reales para esta estación
+                </div>
+              </div>
+
+              <div class="user-tags" id="usuarios-tags"></div>
+
+              <div class="user-comments-list" id="comparacion-comentarios">
+                <div class="empty-comments">Cargando comentarios reales…</div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Resumen global -->
+          <div class="global-comparison-strip">
+            <div>
+              <div class="global-strip-label">
+                Congestión combinada IA + ciudadanos
+              </div>
+              <div class="global-strip-number" id="global-pct">—</div>
+              <div class="global-strip-sub" id="total-reportes">
+                Sin reportes aún
               </div>
             </div>
 
-  <div class="user-report-summary">
-    <div class="user-report-number" id="usuarios-total">0</div>
-    <div class="user-report-text" id="usuarios-total-label">
-      reportes ciudadanos para esta estación
-    </div>
-  </div>
+            <div class="global-station-mini" id="by-station-stats">
+              <div class="mini-station-row">
+                <span class="mini-dot" style="background: var(--c76)"></span>
+                <span>Calle 76</span>
+                <small id="sstat-total-calle76">0 reportes</small>
+                <strong id="sstat-pct-calle76">—</strong>
+              </div>
 
-  <div class="user-tags" id="usuarios-tags"></div>
+              <div class="mini-station-row">
+                <span class="mini-dot" style="background: var(--c85)"></span>
+                <span>Calle 85</span>
+                <small id="sstat-total-calle85">0 reportes</small>
+                <strong id="sstat-pct-calle85">—</strong>
+              </div>
 
-  <div class="user-comments-list" id="comparacion-comentarios">
-    <div class="empty-comments">Cargando comentarios reales…</div>
-  </div>
-</div>
+              <div class="mini-station-row">
+                <span class="mini-dot" style="background: var(--hero)"></span>
+                <span>Los Héroes</span>
+                <small id="sstat-total-heroes">0 reportes</small>
+                <strong id="sstat-pct-heroes">—</strong>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1791,128 +2109,133 @@
         calle85: "#f59e0b",
         heroes: "#ef4444",
       };
-      
+
       const RUTA_COLORS = {
-        A: "#2546a3", 
-        B: "#84c52a", 
-        C: "#f6c21a", 
+        A: "#2546a3",
+        B: "#84c52a",
+        C: "#f6c21a",
         D: "#7657b8",
-        E: "#b38616", 
-        F: "#d71920", 
+        E: "#b38616",
+        F: "#d71920",
         G: "#2797d2",
         H: "#d78b13",
         J: "#d6a6b8",
         K: "#d6b97c",
         L: "#009a9a",
-        M: "#9c1c9d", 
+        M: "#9c1c9d",
       };
 
-function getRutaColor(ruta) {
-  const r = String(ruta || "").trim().toUpperCase();
+      function getRutaColor(ruta) {
+        const r = String(ruta || "")
+          .trim()
+          .toUpperCase();
 
-  // Rutas fáciles o numéricas: 4, 6, 8, etc.
-  if (/^\d+$/.test(r)) {
-    return "#ffffff";
-  }
-
-  const letra = r.charAt(0);
-  return RUTA_COLORS[letra] || "#ffffff";
-}
-
-function escapeHtml(text) {
-  return String(text || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function nivelTexto(nivel) {
-  if (!nivel) return "Sin reportes";
-  const lower = nivel.toLowerCase();
-  return `Congestión ${lower.charAt(0).toUpperCase() + lower.slice(1)}`;
-}
-
-function tiempoRelativo(timestamp) {
-  if (!timestamp) return "";
-
-  const fecha = new Date(timestamp);
-  const ahora = new Date();
-  const diffMs = ahora - fecha;
-  const diffMin = Math.floor(diffMs / 60000);
-
-  if (diffMin < 1) return "hace unos segundos";
-  if (diffMin < 60) return `hace ${diffMin} min`;
-
-  const diffHoras = Math.floor(diffMin / 60);
-  if (diffHoras < 24) return `hace ${diffHoras} h`;
-
-  const diffDias = Math.floor(diffHoras / 24);
-  return `hace ${diffDias} d`;
-}
-
-async function loadComentariosCiudadanos(stationKey) {
-  const cont = $("#comparacion-comentarios");
-  if (!cont) return;
-
-  cont.innerHTML = `<div class="empty-comments">Cargando comentarios reales…</div>`;
-
-  try {
-    const resp = await fetch(`${API_BASE}/report/comments/${stationKey}?limit=6`);
-    const data = await resp.json();
-
-    const titulo = $("#usuarios-nivel-titulo");
-    if (titulo) {
-      titulo.textContent = data.nivel_mas_reportado
-        ? nivelTexto(data.nivel_mas_reportado)
-        : "Reportes de usuarios";
-    }
-
-   const comentarios = data.comentarios || [];
-   const total = $("#usuarios-total");
-   if (total) total.textContent = data.total_con_comentario ?? comentarios.length;
-   const totalLabel = $("#usuarios-total-label");
-   if (totalLabel) {
-  totalLabel.textContent = `comentarios reales para ${data.station_name}`;
-}
-
-    const tags = $("#usuarios-tags");
-    if (tags) {
-      const distComentarios = { BAJO: 0, MEDIO: 0, ALTO: 0 };
-
-      comentarios.forEach((r) => {
-        if (distComentarios[r.nivel_usuario] !== undefined) {
-          distComentarios[r.nivel_usuario]++;
+        // Rutas fáciles o numéricas: 4, 6, 8, etc.
+        if (/^\d+$/.test(r)) {
+          return "#ffffff";
         }
-      });
-      tags.innerHTML = ["BAJO", "MEDIO", "ALTO"]
-      .filter((nivel) => distComentarios[nivel] > 0)
-      .map((nivel) => { 
-        const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO; 
-        return `
+
+        const letra = r.charAt(0);
+        return RUTA_COLORS[letra] || "#ffffff";
+      }
+
+      function escapeHtml(text) {
+        return String(text || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function nivelTexto(nivel) {
+        if (!nivel) return "Sin reportes";
+        const lower = nivel.toLowerCase();
+        return `Congestión ${lower.charAt(0).toUpperCase() + lower.slice(1)}`;
+      }
+
+      function tiempoRelativo(timestamp) {
+        if (!timestamp) return "";
+
+        const fecha = new Date(timestamp);
+        const ahora = new Date();
+        const diffMs = ahora - fecha;
+        const diffMin = Math.floor(diffMs / 60000);
+
+        if (diffMin < 1) return "hace unos segundos";
+        if (diffMin < 60) return `hace ${diffMin} min`;
+
+        const diffHoras = Math.floor(diffMin / 60);
+        if (diffHoras < 24) return `hace ${diffHoras} h`;
+
+        const diffDias = Math.floor(diffHoras / 24);
+        return `hace ${diffDias} d`;
+      }
+
+      async function loadComentariosCiudadanos(stationKey) {
+        const cont = $("#comparacion-comentarios");
+        if (!cont) return;
+
+        cont.innerHTML = `<div class="empty-comments">Cargando comentarios reales…</div>`;
+
+        try {
+          const resp = await fetch(
+            `${API_BASE}/report/comments/${stationKey}?limit=6`,
+          );
+          const data = await resp.json();
+
+          const titulo = $("#usuarios-nivel-titulo");
+          if (titulo) {
+            titulo.textContent = data.nivel_mas_reportado
+              ? nivelTexto(data.nivel_mas_reportado)
+              : "Reportes de usuarios";
+          }
+
+          const comentarios = data.comentarios || [];
+          const total = $("#usuarios-total");
+          if (total)
+            total.textContent = data.total_con_comentario ?? comentarios.length;
+          const totalLabel = $("#usuarios-total-label");
+          if (totalLabel) {
+            totalLabel.textContent = `comentarios reales para ${data.station_name}`;
+          }
+
+          const tags = $("#usuarios-tags");
+          if (tags) {
+            const distComentarios = { BAJO: 0, MEDIO: 0, ALTO: 0 };
+
+            comentarios.forEach((r) => {
+              if (distComentarios[r.nivel_usuario] !== undefined) {
+                distComentarios[r.nivel_usuario]++;
+              }
+            });
+            tags.innerHTML = ["BAJO", "MEDIO", "ALTO"]
+              .filter((nivel) => distComentarios[nivel] > 0)
+              .map((nivel) => {
+                const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
+                return `
         <span class="user-tag" style="border-color:${c.dot};color:${c.text};background:${c.glow};">
           ${nivel}: ${distComentarios[nivel]}
           </span> 
           `;
-        })
-        .join("");
-      }
+              })
+              .join("");
+          }
 
-    if (!comentarios.length) {
-      cont.innerHTML = `
+          if (!comentarios.length) {
+            cont.innerHTML = `
         <div class="empty-comments">
           Todavía no hay comentarios escritos para ${data.station_name}.
         </div>
       `;
-      return;
-    }
+            return;
+          }
 
-    cont.innerHTML = comentarios
-      .map((r) => {
-        const c = CONG_COLORS[r.nivel_usuario] || CONG_COLORS.BAJO;
+          cont.innerHTML = comentarios
+            .map((r) => {
+              const c = CONG_COLORS[r.nivel_usuario] || CONG_COLORS.BAJO;
 
-        return `
+              return `
           <div class="user-comment-item">
             <div class="user-comment-text">
               ${escapeHtml(r.comentario)}
@@ -1926,18 +2249,17 @@ async function loadComentariosCiudadanos(stationKey) {
             </div>
           </div>
         `;
-      })
-      .join("");
-
-  } catch (e) {
-    console.error("Error cargando comentarios reales:", e);
-    cont.innerHTML = `
+            })
+            .join("");
+        } catch (e) {
+          console.error("Error cargando comentarios reales:", e);
+          cont.innerHTML = `
       <div class="empty-comments">
         Error cargando comentarios desde la base de datos.
       </div>
     `;
-  }
-}
+        }
+      }
       const STATION_NAMES = {
         calle76: "Calle 76",
         calle85: "Calle 85",
@@ -1963,7 +2285,7 @@ async function loadComentariosCiudadanos(stationKey) {
     padding:2px 10px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:.5px;`;
       }
 
-      function congestionPercent(p) { 
+      function congestionPercent(p) {
         if (!p) return 0;
         if (p.porcentaje_congestion !== undefined) {
           return Math.round(p.porcentaje_congestion);
@@ -1977,6 +2299,50 @@ async function loadComentariosCiudadanos(stationKey) {
         if (!p) return Number(valor) || 0;
         const ref = (Number(p.umbral_alto) || 80) * 1.5;
         return Math.min(Math.round(((Number(valor) || 0) / ref) * 100), 100);
+      }
+
+      function renderIAPanel(stationKey) {
+        if (!lastPrediction) return;
+
+        const p = lastPrediction.predicciones?.[stationKey];
+        if (!p) return;
+
+        const nivel =
+          lastPrediction.congestion_map?.[stationKey] || p.congestion || "BAJO";
+        const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
+        const pct = congestionPercent(p);
+
+        const nameEl = $("#ia-station-name");
+        if (nameEl) {
+          nameEl.textContent = p.nombre || STATION_NAMES[stationKey];
+          nameEl.style.color = c.dot;
+        }
+
+        const pctEl = $("#ia-pct");
+        if (pctEl) {
+          pctEl.textContent = `${pct}%`;
+          pctEl.style.color = c.dot;
+        }
+
+        const barEl = $("#ia-bar");
+        if (barEl) {
+          barEl.style.width = `${pct}%`;
+          barEl.style.background = c.dot;
+        }
+
+        applyBadge($("#ia-level"), nivel);
+
+        const paxEl = $("#ia-pasajeros");
+        if (paxEl) paxEl.textContent = p.validaciones ?? "—";
+
+        const confEl = $("#ia-confianza");
+        if (confEl) {
+          const conf = Math.round((Number(p.confianza) || 0) * 100);
+          confEl.textContent = `${conf}%`;
+        }
+
+        const franjaEl = $("#ia-franja");
+        if (franjaEl) franjaEl.textContent = lastPrediction.franja || "—";
       }
 
       function setActiveStation(key) {
@@ -1995,6 +2361,12 @@ async function loadComentariosCiudadanos(stationKey) {
         loadServiciosFull(key);
         // Update servicios title in right panel
         $("#servicios-titulo").textContent = STATION_NAMES[key];
+
+        $$(".compare-tab").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.compareStation === key);
+        });
+
+        renderIAPanel(key);
         loadComentariosCiudadanos(key);
       }
 
@@ -2057,7 +2429,7 @@ async function loadComentariosCiudadanos(stationKey) {
           }
 
           const bar = $(`#sc-bar-${key}`);
-          if (bar) {       
+          if (bar) {
             bar.style.width = `${pctCongestion}%`;
             bar.style.background = c.dot;
           }
@@ -2105,12 +2477,12 @@ async function loadComentariosCiudadanos(stationKey) {
           const recPct = congestionPercent(recPred);
           const motEl = $("#rec-motivo");
           if (motEl)
-          motEl.textContent = `Nivel '${rec.congestion}' con ${recPct}% de congestión estimada.`;
-        const valEl = $("#rec-val");
-        if (valEl)
-        valEl.textContent = `${recPct}% de congestión estimada`;
-      }
-      secondsSince = 0;
+            motEl.textContent = `Nivel '${rec.congestion}' con ${recPct}% de congestión estimada.`;
+          const valEl = $("#rec-val");
+          if (valEl) valEl.textContent = `${recPct}% de congestión estimada`;
+        }
+        renderIAPanel(activeStation);
+        secondsSince = 0;
       }
 
       // ─── Fetch predicción ─────────────────────────────────────────────────────────
@@ -2191,9 +2563,15 @@ async function loadComentariosCiudadanos(stationKey) {
           cong: iv.cong_heroes,
         }));
 
-        const data76 = intervalos.map((iv) => intervalPercent(iv.calle76, "calle76"));
-        const data85 = intervalos.map((iv) => intervalPercent(iv.calle85, "calle85"));
-        const dataHeroes = intervalos.map((iv) => intervalPercent(iv.heroes, "heroes"));
+        const data76 = intervalos.map((iv) =>
+          intervalPercent(iv.calle76, "calle76"),
+        );
+        const data85 = intervalos.map((iv) =>
+          intervalPercent(iv.calle85, "calle85"),
+        );
+        const dataHeroes = intervalos.map((iv) =>
+          intervalPercent(iv.heroes, "heroes"),
+        );
 
         chartInstance = new Chart(canvas.getContext("2d"), {
           type: "line",
@@ -2492,11 +2870,12 @@ async function loadComentariosCiudadanos(stationKey) {
           const resp = await fetch(`${API_BASE}/report/stats`);
           const data = await resp.json();
 
-         const gpct = $("#global-pct");
-        if (gpct)
-          gpct.textContent = data.congestion_mixta_global !== undefined
-            ? `${data.congestion_mixta_global}%`
-            : "—";
+          const gpct = $("#global-pct");
+          if (gpct)
+            gpct.textContent =
+              data.congestion_mixta_global !== undefined
+                ? `${data.congestion_mixta_global}%`
+                : "—";
           const trep = $("#total-reportes");
           if (trep)
             trep.textContent = `${data.total} reporte${data.total !== 1 ? "s" : ""} ciudadanos`;
@@ -2506,9 +2885,10 @@ async function loadComentariosCiudadanos(stationKey) {
             if (!s) return;
             const pEl = $(`#sstat-pct-${key}`);
             if (pEl) {
-              pEl.textContent = s.congestion_mixta !== undefined
-                ? `${s.congestion_mixta}%`
-                : "—";
+              pEl.textContent =
+                s.congestion_mixta !== undefined
+                  ? `${s.congestion_mixta}%`
+                  : "—";
             }
             const tEl = $(`#sstat-total-${key}`);
             if (tEl)
@@ -2581,6 +2961,12 @@ async function loadComentariosCiudadanos(stationKey) {
           });
         });
 
+        $$(".compare-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            setActiveStation(tab.dataset.compareStation);
+          });
+        });
+
         // Contador actualización
         setInterval(() => {
           secondsSince++;
@@ -2595,7 +2981,7 @@ async function loadComentariosCiudadanos(stationKey) {
         const now = new Date();
         const clockEl = $("#top-clock");
         const dateEl = $("#top-date");
-  
+
         if (clockEl) {
           clockEl.textContent = now.toLocaleTimeString("es-CO", {
             hour: "2-digit",
@@ -2614,9 +3000,10 @@ async function loadComentariosCiudadanos(stationKey) {
           });
         }
       }
-      
+
       async function init() {
-        updateTopDateTime();setInterval(updateTopDateTime, 1000);
+        updateTopDateTime();
+        setInterval(updateTopDateTime, 1000);
         attachEvents();
         await fetchAndUpdate();
         await loadChart(2);
