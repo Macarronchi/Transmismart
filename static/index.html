@@ -1687,6 +1687,32 @@
         transform: translateY(-1px);
         box-shadow: 0 0 28px rgba(249, 115, 22, 0.35);
       }
+
+      .human-panel .user-report-summary {
+        border-color: var(--human-color, #f87171) !important;
+        background: var(--human-glow, rgba(220, 38, 38, 0.18)) !important;
+        box-shadow: 0 0 18px var(--human-glow, rgba(220, 38, 38, 0.18));
+      }
+
+      .human-panel .user-report-number {
+        color: var(--human-color, #f87171) !important;
+      }
+
+      .human-panel .user-report-text {
+        color: #f9fafb !important;
+      }
+
+      .services-note {
+        color: var(--text2);
+        font-size: 13px;
+        line-height: 1.5;
+        max-width: 850px;
+        margin: -6px 0 16px;
+        padding: 12px 14px;
+        border: 1px solid #303030;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.035);
+      }
     </style>
   </head>
   <body>
@@ -2021,6 +2047,12 @@
           </svg>
           Explorar estación
         </div>
+        <p class="services-note">
+          Recuerda que en TransmiSmart contamos con rutas de fácil acceso por
+          medio de las estaciones seleccionadas. Sin embargo, no se muestra el
+          horario exacto en el que cada ruta deja de circular o puede
+          encontrarse fuera de servicio.
+        </p>
         <div class="station-tabs">
           <button class="station-tab active" data-station-tab="heroes">
             Los Héroes
@@ -2355,6 +2387,16 @@
         return `Congestión ${lower.charAt(0).toUpperCase() + lower.slice(1)}`;
       }
 
+      function nivelAdjetivo(nivel) {
+        const n = String(nivel || "").toUpperCase();
+
+        if (n === "BAJO") return "baja";
+        if (n === "MEDIO") return "media";
+        if (n === "ALTO") return "alta";
+
+        return "sin reportes";
+      }
+
       function tiempoRelativo(timestamp) {
         if (!timestamp) return "";
 
@@ -2411,7 +2453,7 @@
           const totalLabel = $("#usuarios-total-label");
           if (totalLabel) {
             const nivelMayor = data.nivel_mas_reportado || "SIN REPORTES";
-            totalLabel.textContent = `usuarios reportan congestión ${nivelMayor.toLowerCase()}`;
+            totalLabel.textContent = `usuarios reportan congestión ${nivelAdjetivo(nivelMayor)}`;
           }
 
           const tags = $("#usuarios-tags");
@@ -3157,7 +3199,9 @@
             const s = data.by_station?.[activeStation];
 
             if (s) {
-              const nivelIA = s.nivel_ia || "SIN DATO";
+              const predActiva = lastPrediction?.predicciones?.[activeStation];
+              const pctIA = congestionPercent(predActiva);
+              const nivelIA = nivelFromPct(pctIA);
 
               const dist = s.distribucion || {};
               const nivelUsuarios = ["BAJO", "MEDIO", "ALTO"].reduce(
@@ -3179,13 +3223,13 @@
               } else if (coincide) {
                 msg.innerHTML = `
         <strong>Lectura alineada</strong><br>
-        La predicción del sistema y la percepción de los usuarios coinciden en ${STATION_NAMES[activeStation]}. El estado reportado es congestión ${nivelUsuarios.toLowerCase()}.
+        La predicción del sistema y la percepción de los usuarios coinciden en ${STATION_NAMES[activeStation]}. Ambos resultados indican congestión ${nivelUsuarios.toLowerCase()}, por lo que la lectura actual es consistente.
       `;
                 msg.className = "global-strip-sub comparison-message ok";
               } else {
                 msg.innerHTML = `
         <strong>Discrepancia detectada</strong><br>
-        Existe una discrepancia entre la predicción del sistema y la percepción de los usuarios en ${STATION_NAMES[activeStation]}. Considere rutas alternativas y tome precauciones.
+        Existe una discrepancia entre la predicción del sistema y la percepción de los usuarios en ${STATION_NAMES[activeStation]}. La IA estima congestión ${nivelIA.toLowerCase()}, mientras los usuarios reportan congestión ${nivelUsuarios.toLowerCase()}. Considere rutas alternativas y tome precauciones.
       `;
                 msg.className = "global-strip-sub comparison-message warning";
               }
