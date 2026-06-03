@@ -10,6 +10,7 @@
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root {
         --bg: #0b0f1a;
@@ -1329,16 +1330,16 @@
       .ia-panel {
         background: linear-gradient(
           135deg,
-          rgba(245, 158, 11, 0.13),
+          var(--ia-glow, rgba(245, 158, 11, 0.13)),
           rgba(0, 0, 0, 0.12)
         );
-        border-right: 1px solid rgba(245, 158, 11, 0.45);
+        border-right: 1px solid var(--ia-color, rgba(245, 158, 11, 0.45));
       }
 
       .human-panel {
         background: linear-gradient(
           135deg,
-          rgba(220, 38, 38, 0.13),
+          var(--human-glow, rgba(220, 38, 38, 0.13)),
           rgba(0, 0, 0, 0.12)
         );
       }
@@ -1359,11 +1360,11 @@
       }
 
       .ia-panel .compare-title {
-        color: #facc15;
+        color: var(--ia-color, #facc15);
       }
 
       .human-panel .compare-title {
-        color: #f87171;
+        color: var(--human-color, #f87171);
       }
 
       .ia-current-row {
@@ -1557,17 +1558,24 @@
       }
 
       .ia-icon {
-        color: #facc15;
-        background: rgba(245, 158, 11, 0.12);
-        border: 2px solid rgba(245, 158, 11, 0.65);
-        box-shadow: 0 0 28px rgba(245, 158, 11, 0.18);
+        color: var(--ia-color, #facc15);
+        background: var(--ia-glow, rgba(245, 158, 11, 0.12));
+        border: 2px solid var(--ia-color, #facc15);
+        box-shadow: 0 0 28px var(--ia-glow, rgba(245, 158, 11, 0.18));
       }
 
       .users-icon {
-        color: #f87171;
-        background: rgba(220, 38, 38, 0.12);
-        border: 2px solid rgba(248, 113, 113, 0.55);
-        box-shadow: 0 0 28px rgba(220, 38, 38, 0.18);
+        color: var(--human-color, #f87171);
+        background: var(--human-glow, rgba(220, 38, 38, 0.12));
+        border: 2px solid var(--human-color, #f87171);
+        box-shadow: 0 0 28px var(--human-glow, rgba(220, 38, 38, 0.18));
+      }
+
+      .panel-icon i,
+      .compare-title-icon {
+        width: 22px;
+        height: 22px;
+        stroke-width: 2.4;
       }
 
       .ia-panel .compare-title,
@@ -2050,7 +2058,7 @@
                 class="card-title compare-main-title"
                 style="margin-bottom: 6px"
               >
-                <span class="compare-title-icon">⚡</span>
+                <i data-lucide="activity" class="compare-title-icon"></i>
                 Comparación Sistema vs Usuarios
                 <span class="compare-pill-mini">IA</span>
                 <span class="compare-pill-mini users">Usuarios</span>
@@ -2078,7 +2086,9 @@
             <!-- Panel IA -->
             <section class="compare-panel ia-panel">
               <div class="panel-title-row">
-                <div class="panel-icon ia-icon">▣</div>
+                <div class="panel-icon ia-icon">
+                  <i data-lucide="cpu"></i>
+                </div>
                 <div>
                   <div class="compare-kicker">Predicción IA</div>
                   <div class="compare-title" id="ia-station-name">—</div>
@@ -2125,7 +2135,9 @@
             <!-- Panel Usuarios -->
             <section class="compare-panel human-panel">
               <div class="panel-title-row">
-                <div class="panel-icon users-icon">👥</div>
+                <div class="panel-icon users-icon">
+                  <i data-lucide="users"></i>
+                </div>
                 <div>
                   <div class="compare-kicker">Reportes ciudadanos</div>
                   <div
@@ -2316,6 +2328,18 @@
           }
 
           const comentarios = data.comentarios || [];
+          const nivelUsuarios = data.nivel_mas_reportado || "BAJO";
+          const colorUsuarios = CONG_COLORS[nivelUsuarios] || CONG_COLORS.BAJO;
+
+          const humanPanel = $(".human-panel");
+          if (humanPanel) {
+            humanPanel.style.setProperty("--human-color", colorUsuarios.dot);
+            humanPanel.style.setProperty("--human-glow", colorUsuarios.glow);
+            humanPanel.style.setProperty(
+              "--human-border",
+              colorUsuarios.border,
+            );
+          }
           const total = $("#usuarios-total");
           if (total)
             total.textContent = data.total_con_comentario ?? comentarios.length;
@@ -2337,6 +2361,12 @@
               .filter((nivel) => distComentarios[nivel] > 0)
               .map((nivel) => {
                 const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
+                const iaPanel = $(".ia-panel");
+                if (iaPanel) {
+                  iaPanel.style.setProperty("--ia-color", c.dot);
+                  iaPanel.style.setProperty("--ia-glow", c.glow);
+                  iaPanel.style.setProperty("--ia-border", c.border);
+                }
                 return `
         <span class="user-tag" style="border-color:${c.dot};color:${c.text};background:${c.glow};">
           ${nivel}: ${distComentarios[nivel]}
@@ -2360,19 +2390,26 @@
               const c = CONG_COLORS[r.nivel_usuario] || CONG_COLORS.BAJO;
 
               return `
-          <div class="user-comment-item">
-            <div class="user-comment-text">
-              ${escapeHtml(r.comentario)}
-            </div>
-            <div class="user-comment-meta">
-              <span class="user-comment-badge" style="background:${c.bg};">
-                ${r.nivel_usuario}
-              </span>
-              <span>${escapeHtml(r.franja || "")}</span>
-              <span>${tiempoRelativo(r.timestamp)}</span>
-            </div>
-          </div>
-        `;
+  <div
+    class="user-comment-item"
+    style="
+      border-color:${c.dot};
+      background:${c.glow};
+      box-shadow:0 0 16px ${c.glow};
+    "
+  >
+    <div class="user-comment-text">
+      ${escapeHtml(r.comentario)}
+    </div>
+    <div class="user-comment-meta">
+      <span class="user-comment-badge" style="background:${c.bg};">
+        ${r.nivel_usuario}
+      </span>
+      <span>${escapeHtml(r.franja || "")}</span>
+      <span>${tiempoRelativo(r.timestamp)}</span>
+    </div>
+  </div>
+`;
             })
             .join("");
         } catch (e) {
@@ -2418,6 +2455,14 @@
         const val = Number(p.validaciones) || 0;
         return Math.min(Math.round((val / ref) * 100), 100);
       }
+
+      function nivelFromPct(pct) {
+        const n = Number(pct) || 0;
+
+        if (n < 52) return "BAJO";
+        if (n < 75) return "MEDIO";
+        return "ALTO";
+      }
       function intervalPercent(valor, key) {
         const p = lastPrediction?.predicciones?.[key];
         if (!p) return Number(valor) || 0;
@@ -2431,11 +2476,9 @@
         const p = lastPrediction.predicciones?.[stationKey];
         if (!p) return;
 
-        const nivel =
-          lastPrediction.congestion_map?.[stationKey] || p.congestion || "BAJO";
-
-        const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
         const pct = congestionPercent(p);
+        const nivel = nivelFromPct(pct);
+        const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
 
         const nameEl = $("#ia-station-name");
         if (nameEl) {
@@ -2550,7 +2593,8 @@
         // Por estación
         STATION_KEYS.forEach((key) => {
           const p = data.predicciones[key];
-          const niv = data.congestion_map[key];
+          const pctCongestion = congestionPercent(p);
+          const niv = nivelFromPct(pctCongestion);
           const c = CONG_COLORS[niv] || CONG_COLORS.BAJO;
 
           // Line view
@@ -2576,7 +2620,6 @@
           }
           applyBadge($(`#sc-badge-${key}`), niv);
 
-          const pctCongestion = congestionPercent(p);
           const valEl = $(`#sc-val-${key}`);
           if (valEl) {
             valEl.textContent = `${pctCongestion}%`;
@@ -2616,7 +2659,10 @@
         // Recomendación
         const rec = data.recomendacion;
         if (rec) {
-          const c = CONG_COLORS[rec.congestion] || CONG_COLORS.BAJO;
+          const recPred = data.predicciones?.[rec.station_key];
+          const recPct = congestionPercent(recPred);
+          const recNivelVisual = nivelFromPct(recPct);
+          const c = CONG_COLORS[recNivelVisual] || CONG_COLORS.BAJO;
           const recCard = $("#recomendacion");
           if (recCard) {
             recCard.style.borderColor = c.border;
@@ -2627,16 +2673,17 @@
             nameEl.textContent = rec.station_name;
             nameEl.style.color = c.dot;
           }
-          applyBadge($("#rec-level"), rec.congestion);
-          const recPred = data.predicciones?.[rec.station_key];
-          const recPct = congestionPercent(recPred);
+          applyBadge($("#rec-level"), recNivelVisual);
           const motEl = $("#rec-motivo");
           if (motEl)
-            motEl.textContent = `Nivel '${rec.congestion}' con ${recPct}% de congestión estimada.`;
+            motEl.textContent = `Nivel '${recNivelVisual}' con ${recPct}% de congestión estimada.`;
           const valEl = $("#rec-val");
           if (valEl) valEl.textContent = `${recPct}% de congestión estimada`;
         }
         renderIAPanel(activeStation);
+        if (window.lucide) {
+          lucide.createIcons();
+        }
         secondsSince = 0;
       }
 
@@ -3160,6 +3207,9 @@
         updateTopDateTime();
         setInterval(updateTopDateTime, 1000);
         attachEvents();
+        if (window.lucide) {
+          lucide.createIcons();
+        }
         await fetchAndUpdate();
         await loadChart(2);
         await loadReporteStats();
