@@ -1500,6 +1500,121 @@
         width: 100%;
         margin: 0 auto;
       }
+
+      .compare-main-title {
+        color: #ffffff !important;
+        font-size: 18px !important;
+        text-transform: none !important;
+        letter-spacing: -0.02em !important;
+        gap: 8px !important;
+      }
+
+      .compare-title-icon {
+        color: #facc15;
+        font-size: 19px;
+        line-height: 1;
+        filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.45));
+      }
+
+      .compare-pill-mini {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 6px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: rgba(250, 204, 21, 0.14);
+        border: 1px solid rgba(250, 204, 21, 0.45);
+        color: #facc15;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+      }
+
+      .compare-pill-mini.users {
+        background: rgba(248, 113, 113, 0.13);
+        border-color: rgba(248, 113, 113, 0.45);
+        color: #f87171;
+      }
+
+      .panel-title-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .panel-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        font-weight: 900;
+        flex-shrink: 0;
+      }
+
+      .ia-icon {
+        color: #facc15;
+        background: rgba(245, 158, 11, 0.12);
+        border: 2px solid rgba(245, 158, 11, 0.65);
+        box-shadow: 0 0 28px rgba(245, 158, 11, 0.18);
+      }
+
+      .users-icon {
+        color: #f87171;
+        background: rgba(220, 38, 38, 0.12);
+        border: 2px solid rgba(248, 113, 113, 0.55);
+        box-shadow: 0 0 28px rgba(220, 38, 38, 0.18);
+      }
+
+      .ia-panel .compare-title,
+      .human-panel .compare-title {
+        margin-bottom: 0 !important;
+      }
+
+      .ia-current-row {
+        background: rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(250, 204, 21, 0.08);
+        border-radius: 16px;
+        padding: 18px;
+      }
+
+      .human-panel .user-report-summary {
+        margin-top: 14px;
+      }
+
+      .ia-data-grid div {
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          background 0.18s ease;
+      }
+
+      .ia-data-grid div:hover {
+        transform: translateY(-2px);
+        border-color: rgba(250, 204, 21, 0.22);
+        background: rgba(0, 0, 0, 0.38);
+      }
+
+      .ia-data-grid strong {
+        line-height: 1.2;
+      }
+
+      .human-panel .user-comment-item {
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          background 0.18s ease;
+      }
+
+      .human-panel .user-comment-item:hover {
+        transform: translateY(-2px);
+        border-color: rgba(248, 113, 113, 0.65);
+        background: rgba(69, 10, 10, 0.38);
+      }
     </style>
   </head>
   <body>
@@ -1931,18 +2046,14 @@
         <div class="stats-card ia-human-card">
           <div class="ia-human-head">
             <div>
-              <div class="card-title" style="margin-bottom: 6px">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-                Comparación IA vs Ciudadanos
+              <div
+                class="card-title compare-main-title"
+                style="margin-bottom: 6px"
+              >
+                <span class="compare-title-icon">⚡</span>
+                Comparación Sistema vs Usuarios
+                <span class="compare-pill-mini">IA</span>
+                <span class="compare-pill-mini users">Usuarios</span>
               </div>
               <div class="ia-human-sub">
                 Contraste entre la predicción del sistema y los reportes reales
@@ -1966,8 +2077,13 @@
           <div class="ia-human-grid">
             <!-- Panel IA -->
             <section class="compare-panel ia-panel">
-              <div class="compare-kicker">Predicción IA</div>
-              <div class="compare-title" id="ia-station-name">—</div>
+              <div class="panel-title-row">
+                <div class="panel-icon ia-icon">▣</div>
+                <div>
+                  <div class="compare-kicker">Predicción IA</div>
+                  <div class="compare-title" id="ia-station-name">—</div>
+                </div>
+              </div>
 
               <div class="ia-current-row">
                 <div>
@@ -2000,20 +2116,25 @@
                 </div>
 
                 <div>
-                  <span>Nivel IA</span>
-                  <strong id="ia-nivel-texto">—</strong>
+                  <span>Lectura IA</span>
+                  <strong id="ia-lectura">—</strong>
                 </div>
               </div>
             </section>
 
             <!-- Panel Usuarios -->
             <section class="compare-panel human-panel">
-              <div class="compare-kicker">Reportes ciudadanos</div>
-              <div
-                class="compare-title user-comments-title"
-                id="usuarios-nivel-titulo"
-              >
-                Reportes de usuarios
+              <div class="panel-title-row">
+                <div class="panel-icon users-icon">👥</div>
+                <div>
+                  <div class="compare-kicker">Reportes ciudadanos</div>
+                  <div
+                    class="compare-title user-comments-title"
+                    id="usuarios-nivel-titulo"
+                  >
+                    Reportes de usuarios
+                  </div>
+                </div>
               </div>
 
               <div class="user-comments-subtitle">
@@ -2346,10 +2467,16 @@
           franjaEl.textContent = lastPrediction.franja || "—";
         }
 
-        const nivelTextoEl = $("#ia-nivel-texto");
-        if (nivelTextoEl) {
-          nivelTextoEl.textContent = nivel;
-          nivelTextoEl.style.color = c.dot;
+        const lecturaEl = $("#ia-lectura");
+        if (lecturaEl) {
+          const lecturas = {
+            BAJO: "Flujo controlado",
+            MEDIO: "Atención moderada",
+            ALTO: "Alta presión",
+          };
+
+          lecturaEl.textContent = lecturas[nivel] || "Monitoreo activo";
+          lecturaEl.style.color = c.dot;
         }
 
         const tendenciaEl = $("#ia-tendencia");
