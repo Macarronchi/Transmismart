@@ -1985,20 +1985,23 @@
 
               <div class="ia-data-grid">
                 <div>
-                  <span>Pasajeros</span>
+                  <span>Pasajeros estimados</span>
                   <strong id="ia-pasajeros">—</strong>
                 </div>
+
                 <div>
-                  <span>Confianza</span>
-                  <strong id="ia-confianza">—</strong>
+                  <span>Tendencia</span>
+                  <strong id="ia-tendencia">—</strong>
                 </div>
+
                 <div>
                   <span>Franja</span>
                   <strong id="ia-franja">—</strong>
                 </div>
+
                 <div>
-                  <span>Fuente</span>
-                  <strong>Modelo IA</strong>
+                  <span>Nivel IA</span>
+                  <strong id="ia-nivel-texto">—</strong>
                 </div>
               </div>
             </section>
@@ -2309,6 +2312,7 @@
 
         const nivel =
           lastPrediction.congestion_map?.[stationKey] || p.congestion || "BAJO";
+
         const c = CONG_COLORS[nivel] || CONG_COLORS.BAJO;
         const pct = congestionPercent(p);
 
@@ -2333,16 +2337,40 @@
         applyBadge($("#ia-level"), nivel);
 
         const paxEl = $("#ia-pasajeros");
-        if (paxEl) paxEl.textContent = p.validaciones ?? "—";
-
-        const confEl = $("#ia-confianza");
-        if (confEl) {
-          const conf = Math.round((Number(p.confianza) || 0) * 100);
-          confEl.textContent = `${conf}%`;
+        if (paxEl) {
+          paxEl.textContent = p.validaciones ?? "—";
         }
 
         const franjaEl = $("#ia-franja");
-        if (franjaEl) franjaEl.textContent = lastPrediction.franja || "—";
+        if (franjaEl) {
+          franjaEl.textContent = lastPrediction.franja || "—";
+        }
+
+        const nivelTextoEl = $("#ia-nivel-texto");
+        if (nivelTextoEl) {
+          nivelTextoEl.textContent = nivel;
+          nivelTextoEl.style.color = c.dot;
+        }
+
+        const tendenciaEl = $("#ia-tendencia");
+        if (tendenciaEl) {
+          const probAlto = Number(p.probabilidades?.ALTO || 0);
+          const probBajo = Number(p.probabilidades?.BAJO || 0);
+
+          let tendencia = "Estable";
+          let simbolo = "→";
+
+          if (probAlto >= 0.5 || nivel === "ALTO") {
+            tendencia = "Subiendo";
+            simbolo = "↑";
+          } else if (probBajo >= 0.5 || nivel === "BAJO") {
+            tendencia = "Bajando";
+            simbolo = "↓";
+          }
+
+          tendenciaEl.textContent = `${simbolo} ${tendencia}`;
+          tendenciaEl.style.color = c.dot;
+        }
       }
 
       function setActiveStation(key) {
